@@ -479,6 +479,9 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
     }, [indicators, data]);
 
     return (
-        <div ref={chartContainerRef} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+        <div 
+            ref={chartContainerRef} 
+            className="absolute top-0 left-0 right-0 bottom-6 md:bottom-0" 
+        />
     );
 };
