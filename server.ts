@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // Cho phép Backend phân phát các file tĩnh của thư mục frontend/dist sau khi build
-app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
+app.use(express.static(path.join(process.cwd(), 'frontend', 'dist')));
 
 // API lấy dữ liệu lịch sử giá OHLCV
 app.get('/api/ohlcv', async (req, res) => {
@@ -58,7 +58,7 @@ app.get('/api/company/:symbol', async (req, res) => {
 
 // Chuyển hướng mọi Request không phải API về file index.html của React (Hỗ trợ React Router)
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
+    res.sendFile(path.join(process.cwd(), 'frontend', 'dist', 'index.html'));
 });
 
 app.listen(port, () => {
