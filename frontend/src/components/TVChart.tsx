@@ -307,9 +307,9 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
             priceScaleId: 'volume',
         });
         
-        // Volume 15% đáy
+        // Volume 15% đáy và nâng lên một chút để tránh bị che bởi thanh điều hướng di động / watermark
         chart.priceScale('volume').applyOptions({
-            scaleMargins: { top: 0.85, bottom: 0 },
+            scaleMargins: { top: 0.8, bottom: 0.08 },
             visible: false,
         });
         volumeRef.current = volumeSeries;
@@ -334,9 +334,9 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
         const macdSignal = chart.addSeries(LineSeries, { color: '#FF6D00', lineWidth: 2, priceScaleId: 'macd', priceLineVisible: false });
         const macdHist = chart.addSeries(HistogramSeries, { priceScaleId: 'macd', priceLineVisible: false });
         
-        // Cấu hình priceScale 'macd' sau khi đã khởi tạo series
+        // Cấu hình priceScale 'macd' và nâng lên một chút để tránh bị che khuất
         chart.priceScale('macd').applyOptions({
-            scaleMargins: { top: 0.7, bottom: 0 },
+            scaleMargins: { top: 0.65, bottom: 0.08 },
             visible: false,
         });
 
