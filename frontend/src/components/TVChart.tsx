@@ -421,16 +421,29 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
             macdSignalRef.current.setData(signal);
             macdHistRef.current.setData(hist);
 
-            // Thay vì zoom out toàn bộ làm nến bị tí hon (fitContent), ta set hiển thị khoảng 180 nến gần nhất (tương đương gần 1 năm daily)
+            // Thay vì zoom out toàn bộ làm nến bị tí hon (fitContent), ta set hiển thị khoảng nến tối ưu dựa trên kích thước màn hình
             if (chartRef.current) {
                 // CHỈ reset lại khung nhìn (Zoom/Pan) nếu mã chứng khoán hoặc khung thời gian thay đổi.
                 // Nếu chỉ là polling cập nhật của cùng một mã, tuyệt đối giữ nguyên khung nhìn của người dùng!
                 if (currentChartIdRef.current !== chartId) {
-                    const count = Math.min(data.length, 180);
-                    chartRef.current.timeScale().setVisibleLogicalRange({
-                        from: data.length - count,
-                        to: data.length + 5, // Thêm 5 nến trống bên phải làm lề giống TradingView
-                    });
+                    const isMobile = window.innerWidth < 768;
+                    const count = Math.min(data.length, isMobile ? 50 : 100);
+                    
+                    const chartInstance = chartRef.current;
+                    const dataLength = data.length;
+                    
+                    setTimeout(() => {
+                        if (chartRef.current === chartInstance) {
+                            try {
+                                chartInstance.timeScale().setVisibleLogicalRange({
+                                    from: dataLength - count,
+                                    to: dataLength + 4, // Thêm 4 nến trống bên phải làm lề giống TradingView
+                                });
+                            } catch (e) {
+                                console.error("Lỗi set visible logical range:", e);
+                            }
+                        }
+                    }, 50);
                     currentChartIdRef.current = chartId;
                 }
             }

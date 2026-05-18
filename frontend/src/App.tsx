@@ -309,7 +309,7 @@ function App() {
           <form onSubmit={handleSearch} className="flex items-center hover:bg-gray-100 px-2 py-1 md:py-1.5 rounded cursor-pointer border border-gray-200 focus-within:border-blue-500 focus-within:bg-white transition-colors min-w-[90px]">
             <Search size={14} className="text-gray-500 mr-1 md:mr-2" />
             <input
-              className="w-14 md:w-20 font-bold bg-transparent outline-none uppercase text-xs md:text-sm"
+              className="w-14 md:w-20 font-bold bg-transparent outline-none uppercase text-base md:text-sm"
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
               placeholder="MÃ CK"

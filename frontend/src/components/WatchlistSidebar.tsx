@@ -122,7 +122,7 @@ export const WatchlistSidebar: React.FC<WatchlistSidebarProps> = ({
           <Search size={14} className="text-gray-400 mr-2" />
           <input
             type="text"
-            className="w-full bg-transparent outline-none text-xs text-gray-800 font-semibold"
+            className="w-full bg-transparent outline-none text-base md:text-xs text-gray-800 font-semibold"
             placeholder="Tìm nhanh mã CP (Enter để xem biểu đồ)..."
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
