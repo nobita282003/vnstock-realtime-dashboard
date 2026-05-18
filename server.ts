@@ -44,6 +44,46 @@ app.get('/api/watchlist', async (req, res) => {
     }
 });
 
+// API lấy dữ liệu Screener (Bộ lọc) với cơ chế Quét ngầm (Background Worker) và Caching
+import { Screener } from './src/index';
+
+let cachedScreenerData: any[] = [];
+let lastScreenerTime = 0;
+let isScanning = false;
+
+const runBackgroundScan = async () => {
+    if (isScanning) return;
+    isScanning = true;
+    console.log("⏳ [Backend] Bắt đầu quét tín hiệu 500+ cổ phiếu ngầm...");
+    try {
+        const startTime = Date.now();
+        const screener = new Screener();
+        const data = await screener.scanAll();
+        cachedScreenerData = data;
+        lastScreenerTime = Date.now();
+        console.log(`✅ [Backend] Đã quét xong 500+ mã trong ${(lastScreenerTime - startTime) / 1000}s. Tổng cộng: ${data.length} mã có tín hiệu.`);
+    } catch (error: any) {
+        console.error("❌ [Backend] Lỗi khi quét tín hiệu ngầm:", error.message);
+    } finally {
+        isScanning = false;
+    }
+};
+
+// Khởi động quét ngầm sau 2 giây khi Server chạy
+setTimeout(runBackgroundScan, 2000);
+
+// Cứ mỗi 3 phút chạy quét lại một lần ngầm để cập nhật giá trị mới nhất
+setInterval(runBackgroundScan, 3 * 60 * 1000);
+
+app.get('/api/screener', async (req, res) => {
+    try {
+        // Trả về dữ liệu đã được tính toán sẵn từ Cache ngay lập tức (< 1ms!)
+        res.json(cachedScreenerData);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // API lấy thông tin công ty
 app.get('/api/company/:symbol', async (req, res) => {
     try {

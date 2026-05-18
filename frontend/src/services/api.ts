@@ -82,3 +82,14 @@ export const fetchWatchlistData = async (symbols: string[]) => {
         return [];
     }
 }
+
+export const fetchScreener = async () => {
+    try {
+        const API_BASE = import.meta.env.VITE_API_URL || '';
+        const response = await axios.get(`${API_BASE}/api/screener`);
+        return response.data;
+    } catch (error) {
+        console.error("Lỗi tải Screener", error);
+        return [];
+    }
+}

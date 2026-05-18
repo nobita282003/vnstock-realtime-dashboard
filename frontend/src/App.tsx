@@ -247,7 +247,8 @@ function App() {
     const last = trades[trades.length - 1];
     if (last.type === 'MUA') {
       // Lệnh đang mở (Đang nắm giữ)
-      const daysHeld = Math.floor((latestData.time - last.time) / (24 * 60 * 60)); // Tính nhẩm T+
+      // Tính T+ chuẩn (Bỏ qua T7, CN)
+      const daysHeld = (data.length - 1) - last.index;
       const profit = ((latestData.close - last.price) / last.price) * 100;
       tradeSummary = {
         status: 'BÁO MUA',
@@ -270,7 +271,7 @@ function App() {
         }
       }
       if (prevBuy) {
-        const daysHeld = Math.floor((last.time - prevBuy.time) / (24 * 60 * 60));
+        const daysHeld = last.index - prevBuy.index;
         const profit = ((last.price - prevBuy.price) / prevBuy.price) * 100;
         tradeSummary = {
           status: 'BÁO BÁN',
