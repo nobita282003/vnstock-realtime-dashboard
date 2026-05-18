@@ -3,21 +3,24 @@ import { Market } from './Market';
 // Danh sách 500+ cổ phiếu active trên thị trường Việt Nam (HOSE, HNX, UPCoM)
 const WATCHLIST_SYMBOLS = [
     // --- HOSE (VN30 & VÀNG) ---
-    'ACB', 'BCM', 'BID', 'BVH', 'CTG', 'FPT', 'GAS', 'GVR', 'HPG', 'MBB',
-    'MSN', 'MWG', 'PLX', 'PNJ', 'POW', 'SAB', 'SHB', 'SSB', 'SSI', 'STB',
-    'TCB', 'TPB', 'VCB', 'VHM', 'VIC', 'VJC', 'VNM', 'VPB', 'VRE', 'LPB',
+    'ACB', 'BCM', 'BID', 'BVH', 'CTG', 'FPT', 'GAS', 'GVR', 'HDB', 'HPG',
+    'LPB', 'MBB', 'MSN', 'MWG', 'PLX', 'PNJ', 'POW', 'SAB', 'SHB', 'SSB',
+    'SSI', 'STB', 'TCB', 'TPB', 'VCB', 'VHM', 'VIB', 'VIC', 'VJC', 'VNM',
+    'VPB', 'VRE',
     
-    // --- CHỨNG KHOÁN & TÀI CHÍNH ---
-    'VIX', 'VND', 'VCI', 'HCM', 'SHS', 'MBS', 'FTS', 'BSI', 'CTS', 'ORS',
-    'AGR', 'BVS', 'TCI', 'PSI', 'APG', 'TVB', 'SBS', 'VDS', 'IVS', 'EVS',
-    'HBS', 'TVC', 'TVS', 'WSS', 'AAS', 'VIG', 'DSC', 'VFS', 'HAC', 'PFS',
+    // --- NGÂN HÀNG & CHỨNG KHOÁN & TÀI CHÍNH ---
+    'MSB', 'OCB', 'EIB', 'NAB', 'ABB', 'BVB', 'PGB', 'SGB', 'VBB', 'BAB',
+    'NVB', 'KLB', 'VAB', 'EVF', 'DSE', 'BMS', 'ABW', 'PHS', 'CSI', 'VIX',
+    'VND', 'VCI', 'HCM', 'SHS', 'MBS', 'FTS', 'BSI', 'CTS', 'ORS', 'AGR',
+    'BVS', 'TCI', 'PSI', 'APG', 'TVB', 'SBS', 'VDS', 'IVS', 'EVS', 'HBS',
+    'TVC', 'TVS', 'WSS', 'AAS', 'VIG', 'DSC', 'VFS', 'HAC', 'PFS',
     
     // --- BẤT ĐỘNG SẢN & PHÁT TRIỂN ĐÔ THỊ ---
     'DIG', 'DXG', 'NLG', 'KDH', 'CEO', 'PDR', 'DXS', 'HDC', 'IJC', 'VPI',
     'TCH', 'HQC', 'SCR', 'CRE', 'SJS', 'SZC', 'KBC', 'ITA', 'LHG', 'TIP',
     'D2D', 'NHA', 'DRH', 'NDN', 'VPH', 'QCG', 'LDG', 'HAR', 'KHG', 'TCD',
     'EVG', 'MST', 'IDJ', 'API', 'APS', 'L14', 'DTA', 'FIT', 'ITC', 'LGL',
-    'NBB', 'NTL', 'PFL', 'PTL', 'PVL', 'TDH', 'VRC', 'SZL', 'SZB',
+    'NBB', 'NTL', 'PFL', 'PTL', 'PVL', 'TDH', 'VRC', 'SZL', 'SZB', 'IDC',
     
     // --- THÉP & KHAI KHOÁNG ---
     'HSG', 'NKG', 'TLH', 'SMC', 'POM', 'VGS', 'TIS', 'TVN', 'KSB', 'DHA',
@@ -25,7 +28,7 @@ const WATCHLIST_SYMBOLS = [
     'HGM', 'KHL', 'KMT', 'LCM', 'MDC', 'MIC', 'MVB', 'NAG', 'TCS', 'TDN',
     
     // --- XÂY DỰNG & ĐẦU TƯ CÔNG ---
-    'VCG', 'HHV', 'LCG', 'FCN', 'C4G', 'G36', 'BCG', 'CII', 'HUT', 'HT1',
+    'VCG', 'HHV', 'LCG', 'FCN', 'C4G', 'G36', 'BCG', 'CII', 'HUT', 'HT1', 'CTI',
     'BCC', 'DPG', 'PHR', 'DPR', 'TRC', 'DRI', 'CDC', 'CTD', 'HBC',
     'SCG', 'ACC', 'CMS', 'CSC', 'L18', 'MCG', 'PHC', 'SD5',
     'SD6', 'SD9', 'S99', 'TGG', 'VC1', 'VC2', 'VC3', 'VC7', 'VC9', 'VMC',
@@ -36,12 +39,12 @@ const WATCHLIST_SYMBOLS = [
     'PVM', 'PVP', 'PVY', 'CNG', 'LIG', 'KHP', 'VPD', 'TMP',
     
     // --- HÓA CHẤT, NHỰA & PHÂN BÓN ---
-    'DPM', 'DCM', 'BFC', 'DDV', 'DGC', 'HVT', 'LIX', 'NET', 'AAA', 'APH',
+    'DPM', 'DCM', 'BFC', 'DDV', 'DGC', 'DHC', 'HVT', 'LIX', 'NET', 'AAA', 'APH',
     'BMP', 'NTP', 'DAG', 'HCD', 'RDP', 'PLP',
     'CSV', 'LAS', 'SFG', 'VFG', 'CPC', 'PLC', 'TOC',
     
     // --- TIÊU DÙNG, BÁN LẺ & THỰC PHẨM ---
-    'FRT', 'DGW', 'PET', 'HAX', 'VHC', 'ANV', 'IDI', 'FMC', 'MPC', 'CMX',
+    'FRT', 'DGW', 'PET', 'HAX', 'VEA', 'VHC', 'ANV', 'IDI', 'FMC', 'MPC', 'CMX',
     'ACL', 'PAN', 'LTG', 'TAR', 'NSC', 'HAG', 'HNG', 'DBC', 'BAF', 'VLC',
     'MCH', 'VOC', 'KDC', 'SBT', 'LSS', 'SLS', 'BHN',
     'DAT', 'TLD', 'MML', 'VSF', 'MCM', 'CLX', 'HTM', 'TTB', 'VHE', 'DL1',
@@ -51,7 +54,7 @@ const WATCHLIST_SYMBOLS = [
     'ICT', 'ONE', 'VGI', 'CTR', 'VTE', 'VNZ', 'VIE', 'SMN', 'VEC',
     
     // --- CẢNG BIỂN, LOGISTICS & VẬN TẢI ---
-    'GMD', 'HAH', 'VSC', 'VIP', 'VTO', 'PDN', 'SGP', 'MVN', 'TCL', 'DXP',
+    'GMD', 'HAH', 'SCS', 'VSC', 'VIP', 'VTO', 'PDN', 'SGP', 'MVN', 'TCL', 'DXP',
     'VOS', 'TMS', 'DVP', 'ILB', 'STG', 'VNA', 'CDN',
     
     // --- DỆT MAY & DA GIÀY ---

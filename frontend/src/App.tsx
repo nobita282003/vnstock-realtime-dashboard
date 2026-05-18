@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Settings, Expand, LayoutGrid, ChevronDown, Star, Menu, Eye, EyeOff, ChevronUp, BookOpen } from 'lucide-react';
+import { Search, Settings, Expand, LayoutGrid, ChevronDown, Star, Menu, Eye, EyeOff, ChevronUp, BookOpen, Zap } from 'lucide-react';
 import { TVChart } from './components/TVChart';
 import { fetchOHLCV } from './services/api';
 import { WatchlistSidebar } from './components/WatchlistSidebar';
@@ -301,9 +301,13 @@ function App() {
             <Menu size={18} />
           </button>
 
-          <div className="font-bold text-blue-600 text-base md:text-lg mx-1 flex items-center gap-1">
-            <div className="w-5 h-5 md:w-6 md:h-6 bg-blue-600 text-white rounded flex items-center justify-center shadow-sm">T</div>
-            <span className="hidden sm:inline">TVClone</span>
+          <div className="font-bold text-base md:text-lg mx-1 flex items-center gap-1.5 shrink-0">
+            <div className="w-7 h-7 bg-gradient-to-tr from-blue-600 to-indigo-500 text-white rounded flex items-center justify-center shadow-md shadow-blue-500/10">
+              <Zap size={14} className="fill-white" />
+            </div>
+            <span className="hidden sm:inline font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-500">
+              Nexus<span className="text-gray-800 font-bold ml-0.5">Trade</span><span className="text-blue-500 font-semibold text-[10px] ml-1 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 uppercase tracking-wider">PRO</span>
+            </span>
           </div>
 
           {/* Ô Tìm kiếm */}

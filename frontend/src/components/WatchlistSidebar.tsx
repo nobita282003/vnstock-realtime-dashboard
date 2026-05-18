@@ -24,7 +24,7 @@ export const WatchlistSidebar: React.FC<ScreenerSidebarProps> = ({
     onToggle
 }) => {
     const [search, setSearch] = useState('');
-    const [activeTab, setActiveTab] = useState<'MUA' | 'HOLD' | 'BÁN'>('MUA');
+    const [activeTab, setActiveTab] = useState<'MUA' | 'HOLD' | 'BÁN' | 'ALL'>('MUA');
     const [screenerData, setScreenerData] = useState<ScreenerResult[]>([]);
     const [loading, setLoading] = useState(true);
     const [visibleCount, setVisibleCount] = useState(30);
@@ -67,8 +67,12 @@ export const WatchlistSidebar: React.FC<ScreenerSidebarProps> = ({
 
     // Lọc theo Tab và Search
     const filteredData = screenerData.filter(item => {
+        // Nếu người dùng nhập tìm kiếm, tìm kiếm trên tất cả các mã (bỏ qua lọc tab)
+        if (search) {
+            return item.symbol.toLowerCase().includes(search.toLowerCase());
+        }
+        if (activeTab === 'ALL') return true;
         if (item.signal !== activeTab) return false;
-        if (search && !item.symbol.toLowerCase().includes(search.toLowerCase())) return false;
         return true;
     });
 
@@ -77,6 +81,7 @@ export const WatchlistSidebar: React.FC<ScreenerSidebarProps> = ({
             case 'MUA': return 'bg-blue-600 text-white';
             case 'BÁN': return 'bg-pink-600 text-white';
             case 'HOLD': return 'bg-green-700 text-white';
+            case 'NONE': return 'bg-gray-400 text-white';
             default: return 'bg-gray-400 text-white';
         }
     };
@@ -115,22 +120,29 @@ export const WatchlistSidebar: React.FC<ScreenerSidebarProps> = ({
             {/* Tabs */}
             <div className="flex border-b border-gray-200">
                 <button 
-                    onClick={() => setActiveTab('MUA')}
-                    className={`flex-1 py-2 text-xs font-bold transition-colors ${activeTab === 'MUA' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/30' : 'text-gray-500 hover:bg-gray-50'}`}
+                    onClick={() => setActiveTab('ALL')}
+                    className={`flex-1 py-2 text-[10px] md:text-xs font-bold transition-colors ${activeTab === 'ALL' ? 'text-gray-800 border-b-2 border-gray-800 bg-gray-100/50' : 'text-gray-500 hover:bg-gray-50'}`}
                 >
-                    MUA T+0
+                    TẤT CẢ
+                    <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-700 text-[9px]">{screenerData.length}</span>
+                </button>
+                <button 
+                    onClick={() => setActiveTab('MUA')}
+                    className={`flex-1 py-2 text-[10px] md:text-xs font-bold transition-colors ${activeTab === 'MUA' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/30' : 'text-gray-500 hover:bg-gray-50'}`}
+                >
+                    MUA
                     <span className="ml-1 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[9px]">{screenerData.filter(d => d.signal === 'MUA').length}</span>
                 </button>
                 <button 
                     onClick={() => setActiveTab('HOLD')}
-                    className={`flex-1 py-2 text-xs font-bold transition-colors ${activeTab === 'HOLD' ? 'text-green-700 border-b-2 border-green-700 bg-green-50/30' : 'text-gray-500 hover:bg-gray-50'}`}
+                    className={`flex-1 py-2 text-[10px] md:text-xs font-bold transition-colors ${activeTab === 'HOLD' ? 'text-green-700 border-b-2 border-green-700 bg-green-50/30' : 'text-gray-500 hover:bg-gray-50'}`}
                 >
                     NẮM GIỮ
                     <span className="ml-1 px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[9px]">{screenerData.filter(d => d.signal === 'HOLD').length}</span>
                 </button>
                 <button 
                     onClick={() => setActiveTab('BÁN')}
-                    className={`flex-1 py-2 text-xs font-bold transition-colors ${activeTab === 'BÁN' ? 'text-pink-600 border-b-2 border-pink-600 bg-pink-50/30' : 'text-gray-500 hover:bg-gray-50'}`}
+                    className={`flex-1 py-2 text-[10px] md:text-xs font-bold transition-colors ${activeTab === 'BÁN' ? 'text-pink-600 border-b-2 border-pink-600 bg-pink-50/30' : 'text-gray-500 hover:bg-gray-50'}`}
                 >
                     BÁN
                     <span className="ml-1 px-1.5 py-0.5 rounded-full bg-pink-100 text-pink-700 text-[9px]">{screenerData.filter(d => d.signal === 'BÁN').length}</span>
@@ -174,7 +186,7 @@ export const WatchlistSidebar: React.FC<ScreenerSidebarProps> = ({
                                 {/* Cột 2: TÍN HIỆU */}
                                 <div className="w-[24%] py-1 px-1 border-r border-gray-100 h-full flex items-center justify-center bg-blue-50/20 shrink-0">
                                     <div className={`w-full py-1.5 rounded-sm font-extrabold text-[10px] md:text-[11px] shadow-sm tracking-wide ${getSignalColor(item.signal)}`}>
-                                        {item.signal}
+                                        {item.signal === 'NONE' ? 'QUAN SÁT' : item.signal}
                                     </div>
                                 </div>
 
