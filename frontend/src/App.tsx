@@ -214,11 +214,11 @@ function App() {
           position: 'belowBar',
           color: '#2962FF', // Xanh dương
           shape: 'arrowUp',
-          text: `MUA ${(currClose).toFixed(2)}`,
+          text: `MUA ${(data[i].open).toFixed(2)}`,
           size: 2
         });
-        trades.push({ type: 'MUA', price: currClose, time: data[i].time, index: i });
-        highestPriceSinceBuy = currClose; // Lưu vết đỉnh mới
+        trades.push({ type: 'MUA', price: data[i].open, time: data[i].time, index: i });
+        highestPriceSinceBuy = data[i].open; // Lưu vết đỉnh mới
       }
       else if (isHolding && isSell) {
         markers.push({
@@ -226,10 +226,10 @@ function App() {
           position: 'aboveBar',
           color: '#E91E63', // Hồng/Đỏ
           shape: 'arrowDown',
-          text: `BÁN ${(currClose).toFixed(2)}`,
+          text: `BÁN ${(data[i].open).toFixed(2)}`,
           size: 2
         });
-        trades.push({ type: 'BÁN', price: currClose, time: data[i].time, index: i });
+        trades.push({ type: 'BÁN', price: data[i].open, time: data[i].time, index: i });
       }
     }
 
@@ -418,6 +418,12 @@ function App() {
                   <div className={`w-2 h-2 rounded-full ${tradeSummary.status === 'BÁO MUA' ? 'bg-[#2962FF]' : 'bg-[#E91E63]'} animate-pulse`}></div>
                   <span className={`font-extrabold ${tradeSummary.status === 'BÁO MUA' ? 'text-[#2962FF]' : 'text-[#E91E63]'}`}>
                     {tradeSummary.status} {tradeSummary.status === 'BÁO MUA' ? tradeSummary.entryPrice : tradeSummary.sellPrice}
+                    <span className="text-[10px] text-gray-500 font-bold ml-1.5 bg-gray-100 px-1 py-0.5 rounded border border-gray-200/50">
+                      {tradeSummary.status === 'BÁO MUA' 
+                        ? tradeSummary.date.split('-').reverse().join('/') 
+                        : tradeSummary.sellDate.split('-').reverse().join('/')
+                      }
+                    </span>
                   </span>
                 </div>
                 {!tradeSummary.isClosed ? (

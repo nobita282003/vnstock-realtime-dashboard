@@ -574,9 +574,21 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
                 const upperVal = bbUpperData[i].value;
                 const lowerVal = bbLowerData[i].value;
 
-                const s10 = sma10Map.get(time);
-                const s20 = sma20Map.get(time);
-                const isBullish = s10 !== undefined && s20 !== undefined ? s10 > s20 : true;
+                // Xác định trạng thái xu hướng dựa trên tín hiệu MUA/BÁN gần nhất trước thời điểm nến
+                let isBullish = false; // Mặc định là vùng đỏ (đang chờ mua hoặc đứng ngoài thị trường)
+                if (Array.isArray(markers) && markers.length > 0) {
+                    let lastActiveMarker = null;
+                    for (let m = 0; m < markers.length; m++) {
+                        if (markers[m].time <= time) {
+                            lastActiveMarker = markers[m];
+                        } else {
+                            break; // Dừng lại vì markers được xếp tăng dần theo thời gian
+                        }
+                    }
+                    if (lastActiveMarker) {
+                        isBullish = lastActiveMarker.shape === 'arrowUp'; // Nếu tín hiệu gần nhất là MUA -> xanh, BÁN -> đỏ
+                    }
+                }
 
                 bbFillData.push({
                     time,
@@ -620,7 +632,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
                 }
             }
         }
-    }, [data]);
+    }, [data, markers]);
 
     // Cập nhật Markers
     useEffect(() => {
