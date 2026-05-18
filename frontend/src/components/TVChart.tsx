@@ -28,7 +28,8 @@ class BandAreaPaneRenderer implements IPrimitivePaneRenderer {
                     endIdx++;
                 }
 
-                ctx.fillStyle = currentTrend ? 'rgba(38, 166, 154, 0.08)' : 'rgba(239, 83, 80, 0.08)';
+                // 1. Vẽ màu nền (fill) giữa hai dải với độ mờ vừa phải, đẹp mắt
+                ctx.fillStyle = currentTrend ? 'rgba(38, 166, 154, 0.12)' : 'rgba(239, 83, 80, 0.12)';
                 ctx.beginPath();
                 
                 ctx.moveTo(this._upperPoints[startIdx].x, this._upperPoints[startIdx].y);
@@ -42,6 +43,24 @@ class BandAreaPaneRenderer implements IPrimitivePaneRenderer {
                 
                 ctx.closePath();
                 ctx.fill();
+
+                // 2. Vẽ đường biên dải trên (Upper Band Line) theo màu xu hướng
+                ctx.strokeStyle = currentTrend ? '#26a69a' : '#ef5350';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(this._upperPoints[startIdx].x, this._upperPoints[startIdx].y);
+                for (let i = startIdx + 1; i <= endIdx; i++) {
+                    ctx.lineTo(this._upperPoints[i].x, this._upperPoints[i].y);
+                }
+                ctx.stroke();
+
+                // 3. Vẽ đường biên dải dưới (Lower Band Line) theo màu xu hướng
+                ctx.beginPath();
+                ctx.moveTo(this._lowerPoints[startIdx].x, this._lowerPoints[startIdx].y);
+                for (let i = startIdx + 1; i <= endIdx; i++) {
+                    ctx.lineTo(this._lowerPoints[i].x, this._lowerPoints[i].y);
+                }
+                ctx.stroke();
                 
                 startIdx = endIdx;
             }
@@ -279,18 +298,18 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
         const markersPlugin = createSeriesMarkers(candlestickSeries, []);
         markersPluginRef.current = markersPlugin;
 
-        // Khởi tạo Bollinger Bands Series
+        // Khởi tạo Bollinger Bands Series (Đặt trong suốt để nét vẽ của Canvas Primitive tự vẽ màu theo xu hướng)
         const bbUpper = chart.addSeries(LineSeries, {
-            color: 'rgba(38, 166, 154, 0.4)', // Màu xanh mờ cho dải trên
-            lineWidth: 1,
+            color: 'transparent',
+            lineWidth: 0,
             crosshairMarkerVisible: false,
             priceLineVisible: false,
         });
         bbUpperRef.current = bbUpper;
 
         const bbLower = chart.addSeries(LineSeries, {
-            color: 'rgba(239, 83, 80, 0.4)', // Màu đỏ mờ cho dải dưới
-            lineWidth: 1,
+            color: 'transparent',
+            lineWidth: 0,
             crosshairMarkerVisible: false,
             priceLineVisible: false,
         });
