@@ -153,7 +153,7 @@ class MarkersPaneRenderer implements IPrimitivePaneRenderer {
 
             this._points.forEach(marker => {
                 const { x, yLow, yHigh, shape, color, text } = marker;
-                const offset = 14; // Đẩy mũi tên cách nến 14px để tạo khoảng thở cực kỳ dễ nhìn!
+                const offset = 24; // Đẩy mũi tên cách nến 24px để tạo khoảng thở cực kỳ dễ nhìn!
 
                 ctx.font = 'bold 10px Inter, Arial, sans-serif';
                 ctx.textAlign = 'center';
@@ -430,6 +430,10 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
             },
             rightPriceScale: {
                 borderColor: '#dfebf0',
+                scaleMargins: {
+                    top: 0.08,
+                    bottom: 0.35, // Giữ biểu đồ giá ở phần trên, nhường 35% khoảng dưới cho Volume và MACD cực kỳ đẹp mắt
+                },
             }
         });
         chartRef.current = chart;

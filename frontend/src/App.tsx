@@ -29,8 +29,8 @@ function App() {
   const [showTimeframeMenu, setShowTimeframeMenu] = useState(false);
 
   // States quản lý 3 cột (Watchlist - Chart - Session detail)
-  const [watchlistOpen, setWatchlistOpen] = useState(window.innerWidth > 768);
-  const [sessionPanelOpen, setSessionPanelOpen] = useState(window.innerWidth > 1024);
+  const [watchlistOpen, setWatchlistOpen] = useState(false);
+  const [sessionPanelOpen, setSessionPanelOpen] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState<'chart' | 'session'>('chart');
 
   // Trạng thái cho chú thích & chỉ báo
@@ -40,7 +40,7 @@ function App() {
     sma20: true,
     macd: true,
     volume: true,
-    bollinger: false
+    bollinger: true
   });
 
 
@@ -119,7 +119,7 @@ function App() {
     const trades: any[] = [];
     const sma10: (number | null)[] = [];
     const sma20: (number | null)[] = [];
-    
+
     // 1. Tính SMA 10, 20
     let sum10 = 0, sum20 = 0;
     for (let i = 0; i < data.length; i++) {
@@ -175,7 +175,7 @@ function App() {
       }
 
       // --- TRẠNG THÁI THỊ TRƯỜNG (CỐT LÕI THUẬT TOÁN) ---
-      
+
       // 1. TRẠNG THÁI BULLISH (TĂNG MẠNH):
       // Đòi hỏi sự đồng thuận: Giá BẮT BUỘC phải nằm trên MA20 (xu hướng tăng) VÀ MACD phải > 0 (động lượng mạnh)
       const currentlyBullish = currHist > 0 && currClose > currMA20;
@@ -200,7 +200,7 @@ function App() {
       // 2. Trailing Stop (Chặn lãi bảo toàn thành quả): 
       // Không để một khoản lãi lớn biến thành lỗ. Mất 8% từ đỉnh cao nhất -> BÁN.
       const isTrailingStop = isHolding && currClose < highestPriceSinceBuy * 0.92;
-      
+
       // 3. Stoploss Khẩn Cấp (Gãy Nền Trọng Yếu):
       // Nếu giá bất ngờ sập mạnh mất hơn 4% dưới MA20 (bán tháo bất chấp MACD có kịp phản ứng hay không) -> BÁN.
       const isCatastrophicStop = currClose < currMA20 * 0.96;
@@ -219,7 +219,7 @@ function App() {
         });
         trades.push({ type: 'MUA', price: currClose, time: data[i].time, index: i });
         highestPriceSinceBuy = currClose; // Lưu vết đỉnh mới
-      } 
+      }
       else if (isHolding && isSell) {
         markers.push({
           time: data[i].time,
@@ -338,8 +338,8 @@ function App() {
                         key={r.value}
                         onClick={() => handleSelectResolution(r)}
                         className={`px-4 py-1.5 cursor-pointer flex justify-between items-center transition-colors ${resolution.value === r.value
-                            ? 'bg-blue-600 text-white font-medium'
-                            : 'hover:bg-gray-100'
+                          ? 'bg-blue-600 text-white font-medium'
+                          : 'hover:bg-gray-100'
                           }`}
                       >
                         {r.label}
@@ -392,8 +392,8 @@ function App() {
             <button
               onClick={() => setMobileActiveTab('chart')}
               className={`flex-1 py-1.5 text-center text-xs font-bold rounded-lg transition-all ${mobileActiveTab === 'chart'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-500 hover:bg-gray-200'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-gray-500 hover:bg-gray-200'
                 }`}
             >
               Biểu đồ kỹ thuật
@@ -401,8 +401,8 @@ function App() {
             <button
               onClick={() => setMobileActiveTab('session')}
               className={`flex-1 py-1.5 text-center text-xs font-bold rounded-lg transition-all ${mobileActiveTab === 'session'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-500 hover:bg-gray-200'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-gray-500 hover:bg-gray-200'
                 }`}
             >
               Số liệu phiên
@@ -410,7 +410,7 @@ function App() {
           </div>
 
           <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-            
+
             {/* MOBILE TRADE SUMMARY (Chỉ hiện trên mobile, dạng dải ngang nhỏ gọn) */}
             {tradeSummary && mobileActiveTab === 'chart' && (
               <div className="md:hidden w-full bg-[#f8fdfc] border-b border-[#a2dcd6] px-3 py-2 flex justify-between items-center text-xs z-20 shrink-0 shadow-sm">
