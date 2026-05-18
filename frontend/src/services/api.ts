@@ -7,7 +7,7 @@ export const fetchOHLCV = async (symbol: string, from: number, to: number, resol
     try {
         const response = await axios.get(url);
         const data = response.data;
-        if (data && data.length > 0) {
+        if (Array.isArray(data) && data.length > 0) {
             return data.map((item: any) => ({
                 time: item.time,
                 open: item.open,
