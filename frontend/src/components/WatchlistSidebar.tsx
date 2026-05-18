@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, TrendingUp, TrendingDown, Clock, Filter, AlertCircle } from 'lucide-react';
+import { Search, Clock, Filter, AlertCircle } from 'lucide-react';
 import { fetchScreener } from '../services/api';
 
 interface ScreenerResult {
