@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { createChart, ColorType, CandlestickSeries, HistogramSeries, LineSeries, createSeriesMarkers } from 'lightweight-charts';
+import { createChart, ColorType, CandlestickSeries, HistogramSeries, LineSeries } from 'lightweight-charts';
 import type { IChartApi, ISeriesPrimitive, IPrimitivePaneView, IPrimitivePaneRenderer } from 'lightweight-charts';
 
 // Custom Canvas Primitive to draw dynamic background color between Bollinger Bands
@@ -139,6 +139,154 @@ class BandAreaPrimitive implements ISeriesPrimitive {
     }
 }
 
+class MarkersPaneRenderer implements IPrimitivePaneRenderer {
+    private _points: any[] = [];
+
+    constructor(points: any[]) {
+        this._points = points;
+    }
+
+    draw(target: any) {
+        target.useMediaCoordinateSpace((context: any) => {
+            const ctx = context.context;
+            if (this._points.length === 0) return;
+
+            this._points.forEach(marker => {
+                const { x, yLow, yHigh, shape, color, text } = marker;
+                const offset = 14; // Đẩy mũi tên cách nến 14px để tạo khoảng thở cực kỳ dễ nhìn!
+
+                ctx.font = 'bold 10px Inter, Arial, sans-serif';
+                ctx.textAlign = 'center';
+
+                if (shape === 'arrowUp') {
+                    // Vẽ mũi tên MUA (arrowUp) chỉ lên, bắt đầu từ (yLow + offset)
+                    const yTip = yLow + offset;
+                    ctx.beginPath();
+                    ctx.moveTo(x, yTip);
+                    ctx.lineTo(x - 5, yTip + 7);
+                    ctx.lineTo(x - 2, yTip + 7);
+                    ctx.lineTo(x - 2, yTip + 14);
+                    ctx.lineTo(x + 2, yTip + 14);
+                    ctx.lineTo(x + 2, yTip + 7);
+                    ctx.lineTo(x + 5, yTip + 7);
+                    ctx.closePath();
+                    
+                    ctx.fillStyle = color;
+                    ctx.fill();
+
+                    // Vẽ chữ 'MUA' kèm giá bên dưới mũi tên, có stroke trắng bao quanh chống đè lên lưới
+                    if (text) {
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 3;
+                        ctx.textBaseline = 'top';
+                        ctx.strokeText(text, x, yTip + 16);
+                        ctx.fillStyle = color;
+                        ctx.fillText(text, x, yTip + 16);
+                    }
+                } else if (shape === 'arrowDown') {
+                    // Vẽ mũi tên BÁN (arrowDown) chỉ xuống, bắt đầu từ (yHigh - offset)
+                    const yTip = yHigh - offset;
+                    ctx.beginPath();
+                    ctx.moveTo(x, yTip);
+                    ctx.lineTo(x - 5, yTip - 7);
+                    ctx.lineTo(x - 2, yTip - 7);
+                    ctx.lineTo(x - 2, yTip - 14);
+                    ctx.lineTo(x + 2, yTip - 14);
+                    ctx.lineTo(x + 2, yTip - 7);
+                    ctx.lineTo(x + 5, yTip - 7);
+                    ctx.closePath();
+
+                    ctx.fillStyle = color;
+                    ctx.fill();
+
+                    // Vẽ chữ 'BÁN' kèm giá bên trên mũi tên, có stroke trắng bao quanh
+                    if (text) {
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 3;
+                        ctx.textBaseline = 'bottom';
+                        ctx.strokeText(text, x, yTip - 16);
+                        ctx.fillStyle = color;
+                        ctx.fillText(text, x, yTip - 16);
+                    }
+                }
+            });
+        });
+    }
+}
+
+class MarkersPaneView implements IPrimitivePaneView {
+    private _source: MarkersPrimitive;
+
+    constructor(source: MarkersPrimitive) {
+        this._source = source;
+    }
+
+    renderer(): IPrimitivePaneRenderer | null {
+        return this._source.renderer();
+    }
+}
+
+class MarkersPrimitive implements ISeriesPrimitive {
+    private _chart: any;
+    private _series: any;
+    private _markers: any[] = [];
+    private _ohlcvMap: Map<number, { high: number, low: number }> = new Map();
+    private _paneView: MarkersPaneView;
+    private _visible: boolean = true;
+
+    constructor(chart: any, series: any) {
+        this._chart = chart;
+        this._series = series;
+        this._paneView = new MarkersPaneView(this);
+    }
+
+    setData(markers: any[], data: any[]) {
+        this._markers = markers;
+        this._ohlcvMap.clear();
+        data.forEach(d => {
+            this._ohlcvMap.set(d.time, { high: d.high, low: d.low });
+        });
+    }
+
+    setVisible(visible: boolean) {
+        this._visible = visible;
+    }
+
+    updateAllViews() {}
+
+    paneViews() {
+        return [this._paneView];
+    }
+
+    renderer(): IPrimitivePaneRenderer | null {
+        if (!this._visible || this._markers.length === 0) return null;
+
+        const timeScale = this._chart.timeScale();
+        const points: any[] = [];
+
+        this._markers.forEach(marker => {
+            const x = timeScale.timeToCoordinate(marker.time);
+            const ohlcv = this._ohlcvMap.get(marker.time);
+            if (x !== null && ohlcv) {
+                const yLow = this._series.priceToCoordinate(ohlcv.low);
+                const yHigh = this._series.priceToCoordinate(ohlcv.high);
+                if (yLow !== null && yHigh !== null) {
+                    points.push({
+                        x,
+                        yLow,
+                        yHigh,
+                        shape: marker.shape,
+                        color: marker.color,
+                        text: marker.text
+                    });
+                }
+            }
+        });
+
+        return new MarkersPaneRenderer(points);
+    }
+}
+
 // Tính toán Bollinger Bands
 function calculateBollingerBands(data: any[], period = 20, multiplier = 2) {
     const upper: any[] = [];
@@ -246,7 +394,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
     const volumeRef = useRef<any>(null);
     const sma10Ref = useRef<any>(null);
     const sma20Ref = useRef<any>(null);
-    const markersPluginRef = useRef<any>(null);
+    const markersPrimitiveRef = useRef<any>(null);
     
     // Bollinger Bands refs
     const bbUpperRef = useRef<any>(null);
@@ -295,13 +443,14 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
         });
         seriesRef.current = candlestickSeries;
 
-        const markersPlugin = createSeriesMarkers(candlestickSeries, []);
-        markersPluginRef.current = markersPlugin;
+        const markersPrimitive = new MarkersPrimitive(chart, candlestickSeries);
+        candlestickSeries.attachPrimitive(markersPrimitive);
+        markersPrimitiveRef.current = markersPrimitive;
 
         // Khởi tạo Bollinger Bands Series (Đặt trong suốt để nét vẽ của Canvas Primitive tự vẽ màu theo xu hướng)
         const bbUpper = chart.addSeries(LineSeries, {
             color: 'transparent',
-            lineWidth: 0,
+            lineWidth: 1,
             crosshairMarkerVisible: false,
             priceLineVisible: false,
         });
@@ -309,7 +458,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
 
         const bbLower = chart.addSeries(LineSeries, {
             color: 'transparent',
-            lineWidth: 0,
+            lineWidth: 1,
             crosshairMarkerVisible: false,
             priceLineVisible: false,
         });
@@ -377,7 +526,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
         return () => {
             resizeObserver.disconnect();
             chart.remove();
-            markersPluginRef.current = null;
+            markersPrimitiveRef.current = null;
             bbUpperRef.current = null;
             bbLowerRef.current = null;
             bbFillPrimitiveRef.current = null;
@@ -471,10 +620,12 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
 
     // Cập nhật Markers
     useEffect(() => {
-        if (markersPluginRef.current && Array.isArray(markers)) {
-            markersPluginRef.current.setMarkers(markers);
+        if (markersPrimitiveRef.current && Array.isArray(markers)) {
+            markersPrimitiveRef.current.setData(markers, data);
+            // Kích hoạt vẽ lại series để Canvas Primitive hiển thị các marker mới
+            if (seriesRef.current) seriesRef.current.applyOptions({});
         }
-    }, [markers]);
+    }, [markers, data]);
 
     // Cập nhật hiển thị (bật tắt Indicators)
     useEffect(() => {
