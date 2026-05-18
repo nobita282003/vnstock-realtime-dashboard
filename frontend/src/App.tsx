@@ -217,7 +217,7 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-full bg-white text-[#131722] font-sans overflow-hidden">
+    <div className="flex flex-col h-[100dvh] w-full bg-white text-[#131722] font-sans overflow-hidden">
       {/* TOP TOOLBAR - Tương thích Mobile */}
       <div className="h-12 md:h-14 border-b border-gray-200 flex items-center justify-between px-2 md:px-4 text-xs md:text-sm bg-white shrink-0 relative z-50">
         <div className="flex items-center gap-2 md:gap-4 shrink-0">
@@ -428,15 +428,15 @@ function App() {
               
               {/* Bảng thống kê lệnh Mua/Bán nổi ở góc phải trên cùng */}
               {tradeSummary && (
-                <div className="absolute top-3 right-16 md:right-20 z-20 select-none">
-                  <table className="border-collapse text-[10px] md:text-xs font-bold bg-[#f7fdfd]/95 backdrop-blur-sm border border-[#a2dcd6] shadow-lg rounded-lg overflow-hidden text-gray-700 w-44 md:w-48">
+                <div className="absolute top-1 right-1 md:top-3 md:right-6 z-20 select-none opacity-90 hover:opacity-100 transition-opacity">
+                  <table className="border-collapse text-[9px] md:text-xs font-bold bg-[#f7fdfd]/95 backdrop-blur-sm border border-[#a2dcd6] shadow-lg rounded-lg overflow-hidden text-gray-700 w-36 md:w-48">
                     <tbody>
                       {/* Dòng Header */}
                       <tr className="bg-[#e2f7f5]/80">
-                        <td className="px-2.5 py-1.5 border border-[#a2dcd6] text-center text-[#c2185b] font-extrabold tracking-wide text-xs">
+                        <td className="px-1.5 py-1 md:px-2.5 md:py-1.5 border border-[#a2dcd6] text-center text-[#c2185b] font-extrabold tracking-wide text-[9px] md:text-xs">
                           {tradeSummary.status}
                         </td>
-                        <td className="px-2.5 py-1.5 border border-[#a2dcd6] text-center text-[#c2185b] font-extrabold text-xs">
+                        <td className="px-1.5 py-1 md:px-2.5 md:py-1.5 border border-[#a2dcd6] text-center text-[#c2185b] font-extrabold text-[9px] md:text-xs">
                           {tradeSummary.status === 'BÁO MUA' ? tradeSummary.entryPrice : tradeSummary.sellPrice}
                         </td>
                       </tr>
@@ -445,42 +445,42 @@ function App() {
                         // ĐANG NẮM GIỮ (LỆNH MUA)
                         <>
                           <tr>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
                               Ngày Báo
                             </td>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-center text-[#0d47a1]">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-center text-[#0d47a1]">
                               {tradeSummary.date}
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
                               T+
                             </td>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-center text-[#0d47a1]">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-center text-[#0d47a1]">
                               {tradeSummary.tPlus}
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
                               Đang lãi:
                             </td>
-                            <td className={`px-2.5 py-1 border border-[#a2dcd6] text-center ${Number(tradeSummary.profit) >= 0 ? 'text-[#1b5e20]' : 'text-[#b71c1c]'}`}>
+                            <td className={`px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-center ${Number(tradeSummary.profit) >= 0 ? 'text-[#1b5e20]' : 'text-[#b71c1c]'}`}>
                               {Number(tradeSummary.profit) > 0 ? '+' : ''}{tradeSummary.profit}%
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
                               Mục tiêu
                             </td>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-center text-[#1b5e20]">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-center text-[#1b5e20]">
                               {tradeSummary.target}
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
                               Cắt lỗ
                             </td>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-center text-[#b71c1c]">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-center text-[#b71c1c]">
                               {tradeSummary.cutloss}
                             </td>
                           </tr>
@@ -489,42 +489,42 @@ function App() {
                         // ĐÃ ĐÓNG LỆNH (BÁO BÁN)
                         <>
                           <tr>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
                               Ngày Mua
                             </td>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-center text-gray-600">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-center text-gray-600">
                               {tradeSummary.buyDate}
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
                               Giá Mua
                             </td>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-center text-gray-700">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-center text-gray-700">
                               {tradeSummary.entryPrice}
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
                               Ngày Bán
                             </td>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-center text-gray-600">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-center text-gray-600">
                               {tradeSummary.sellDate}
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
                               Giá Bán
                             </td>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-center text-gray-700">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-center text-gray-700">
                               {tradeSummary.sellPrice}
                             </td>
                           </tr>
                           <tr>
-                            <td className="px-2.5 py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
+                            <td className="px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-left text-[#0d47a1] font-semibold pl-3">
                               Kết quả
                             </td>
-                            <td className={`px-2.5 py-1 border border-[#a2dcd6] text-center ${Number(tradeSummary.profit) >= 0 ? 'text-[#1b5e20]' : 'text-[#b71c1c]'}`}>
+                            <td className={`px-1.5 py-0.5 md:px-2.5 md:py-1 border border-[#a2dcd6] text-center ${Number(tradeSummary.profit) >= 0 ? 'text-[#1b5e20]' : 'text-[#b71c1c]'}`}>
                               {Number(tradeSummary.profit) > 0 ? '+' : ''}{tradeSummary.profit}%
                             </td>
                           </tr>
