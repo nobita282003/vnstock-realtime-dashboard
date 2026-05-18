@@ -57,7 +57,7 @@ app.get('/api/company/:symbol', async (req, res) => {
 });
 
 // Chuyển hướng mọi Request không phải API về file index.html của React (Hỗ trợ React Router)
-app.get('*', (req, res) => {
+app.use((req, res) => {
     res.sendFile(path.join(process.cwd(), 'frontend', 'dist', 'index.html'));
 });
 
