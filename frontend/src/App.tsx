@@ -242,7 +242,7 @@ function App() {
   const latestSma20 = sma20.length > 0 ? sma20[sma20.length - 1] : null;
 
   // Lấy ra thông tin Trade (Giao dịch) gần nhất để hiển thị ra Bảng
-  let tradeSummary = null;
+  let tradeSummary: any = null;
   if (trades.length > 0 && latestData) {
     const last = trades[trades.length - 1];
     if (last.type === 'MUA') {
