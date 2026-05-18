@@ -15,7 +15,7 @@ class BandAreaPaneRenderer implements IPrimitivePaneRenderer {
     }
 
     draw(target: any) {
-        target.useBitmapCoordinateSpace((context: any) => {
+        target.useMediaCoordinateSpace((context: any) => {
             const ctx = context.context;
             if (this._upperPoints.length === 0 || this._lowerPoints.length === 0) return;
 
