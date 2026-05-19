@@ -550,7 +550,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
 
         const sma10 = mainChart.addSeries(LineSeries, {
             color: '#2962FF',
-            lineWidth: 1.2,
+            lineWidth: 1,
             crosshairMarkerVisible: false,
             priceLineVisible: false,
         });
@@ -558,7 +558,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
 
         const sma20 = mainChart.addSeries(LineSeries, {
             color: '#FF6D00',
-            lineWidth: 1.2,
+            lineWidth: 1,
             crosshairMarkerVisible: false,
             priceLineVisible: false,
         });
@@ -630,8 +630,8 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
         });
         macdChartRef.current = macdChart;
 
-        const macdLine = macdChart.addSeries(LineSeries, { color: '#2962FF', lineWidth: 1.2, priceLineVisible: false });
-        const macdSignal = macdChart.addSeries(LineSeries, { color: '#FF6D00', lineWidth: 1.2, priceLineVisible: false });
+        const macdLine = macdChart.addSeries(LineSeries, { color: '#2962FF', lineWidth: 1, priceLineVisible: false });
+        const macdSignal = macdChart.addSeries(LineSeries, { color: '#FF6D00', lineWidth: 1, priceLineVisible: false });
         const macdHist = macdChart.addSeries(HistogramSeries, { priceLineVisible: false });
 
         macdLineRef.current = macdLine;

@@ -169,10 +169,7 @@ function App() {
   const latestData = data.length > 0 ? data[data.length - 1] : null;
   const prevData = data.length > 1 ? data[data.length - 2] : null;
 
-  const getColor = (current: number, prev: number) => {
-    if (!prev) return 'text-gray-500';
-    return current >= prev ? 'text-green-600' : 'text-red-500';
-  };
+
 
   // Thuật toán giao dịch: SỰ ĐỒNG THUẬN KÉP (Dual Confirmation - Đỉnh cao Thực chiến)
   // Kết hợp hoàn hảo giữa Hành động giá (MA20) và Động lượng (MACD)
