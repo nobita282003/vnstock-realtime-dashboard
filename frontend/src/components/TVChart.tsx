@@ -23,28 +23,28 @@ class BandAreaPaneRenderer implements IPrimitivePaneRenderer {
             while (startIdx < this._upperPoints.length - 1) {
                 const currentTrend = this._trends[startIdx];
                 let endIdx = startIdx;
-                
+
                 while (endIdx < this._upperPoints.length - 1 && this._trends[endIdx] === currentTrend) {
                     endIdx++;
                 }
 
                 ctx.fillStyle = currentTrend ? 'rgba(38, 166, 154, 0.12)' : 'rgba(239, 83, 80, 0.12)';
                 ctx.beginPath();
-                
+
                 ctx.moveTo(this._upperPoints[startIdx].x, this._upperPoints[startIdx].y);
                 for (let i = startIdx + 1; i <= endIdx; i++) {
                     ctx.lineTo(this._upperPoints[i].x, this._upperPoints[i].y);
                 }
-                
+
                 for (let i = endIdx; i >= startIdx; i--) {
                     ctx.lineTo(this._lowerPoints[i].x, this._lowerPoints[i].y);
                 }
-                
+
                 ctx.closePath();
                 ctx.fill();
 
-                ctx.strokeStyle = currentTrend ? '#26a69a' : '#ef5350';
-                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = currentTrend ? 'rgba(38, 166, 154, 0.45)' : 'rgba(239, 83, 80, 0.45)';
+                ctx.lineWidth = 0.8;
                 ctx.beginPath();
                 ctx.moveTo(this._upperPoints[startIdx].x, this._upperPoints[startIdx].y);
                 for (let i = startIdx + 1; i <= endIdx; i++) {
@@ -58,7 +58,7 @@ class BandAreaPaneRenderer implements IPrimitivePaneRenderer {
                     ctx.lineTo(this._lowerPoints[i].x, this._lowerPoints[i].y);
                 }
                 ctx.stroke();
-                
+
                 startIdx = endIdx;
             }
         });
@@ -105,7 +105,7 @@ class BandAreaPrimitive implements ISeriesPrimitive {
         this._visible = visible;
     }
 
-    updateAllViews() {}
+    updateAllViews() { }
 
     paneViews() {
         return [this._paneView];
@@ -167,7 +167,7 @@ class MarkersPaneRenderer implements IPrimitivePaneRenderer {
                     ctx.lineTo(x + 2, yTip + 7);
                     ctx.lineTo(x + 5, yTip + 7);
                     ctx.closePath();
-                    
+
                     ctx.fillStyle = color;
                     ctx.fill();
 
@@ -246,7 +246,7 @@ class MarkersPrimitive implements ISeriesPrimitive {
         this._visible = visible;
     }
 
-    updateAllViews() {}
+    updateAllViews() { }
 
     paneViews() {
         return [this._paneView];
@@ -285,22 +285,22 @@ class MarkersPrimitive implements ISeriesPrimitive {
 function calculateBollingerBands(data: any[], period = 20, multiplier = 2) {
     const upper: any[] = [];
     const lower: any[] = [];
-    
+
     for (let i = 0; i < data.length; i++) {
         if (i < period - 1) continue;
-        
+
         let sum = 0;
         for (let j = 0; j < period; j++) {
             sum += data[i - j].close;
         }
         const avg = sum / period;
-        
+
         let variance = 0;
         for (let j = 0; j < period; j++) {
             variance += Math.pow(data[i - j].close - avg, 2);
         }
         const stdDev = Math.sqrt(variance / period);
-        
+
         upper.push({ time: data[i].time, value: avg + multiplier * stdDev });
         lower.push({ time: data[i].time, value: avg - multiplier * stdDev });
     }
@@ -347,13 +347,13 @@ function calculateMACD(data: any[]) {
     for (let i = 0; i < data.length; i++) {
         macd.push({ time: data[i].time, value: ema12[i].value - ema26[i].value, close: ema12[i].value - ema26[i].value });
     }
-    
+
     const signal = calculateEMA(macd, 9, 'close');
     const hist = [];
     for (let i = 0; i < macd.length; i++) {
         const val = macd[i].value - signal[i].value;
-        hist.push({ 
-            time: macd[i].time, 
+        hist.push({
+            time: macd[i].time,
             value: val,
             color: val >= 0 ? '#26a69a' : '#ef5350'
         });
@@ -390,11 +390,11 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
     const sma10Ref = useRef<any>(null);
     const sma20Ref = useRef<any>(null);
     const markersPrimitiveRef = useRef<any>(null);
-    
+
     const bbUpperRef = useRef<any>(null);
     const bbLowerRef = useRef<any>(null);
     const bbFillPrimitiveRef = useRef<any>(null);
-    
+
     const macdLineRef = useRef<any>(null);
     const macdSignalRef = useRef<any>(null);
     const macdHistRef = useRef<any>(null);
@@ -489,6 +489,8 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
             layout: {
                 background: { type: ColorType.Solid, color: 'white' },
                 textColor: '#333',
+                fontSize: 11,
+                attributionLogo: false,
             },
             grid: {
                 vertLines: { color: '#f0f3fa' },
@@ -508,7 +510,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
                     top: 0.08,
                     bottom: 0.08,
                 },
-                minimumWidth: 100,
+                minimumWidth: 62,
             }
         });
         mainChartRef.current = mainChart;
@@ -548,7 +550,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
 
         const sma10 = mainChart.addSeries(LineSeries, {
             color: '#2962FF',
-            lineWidth: 2,
+            lineWidth: 1.2,
             crosshairMarkerVisible: false,
             priceLineVisible: false,
         });
@@ -556,7 +558,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
 
         const sma20 = mainChart.addSeries(LineSeries, {
             color: '#FF6D00',
-            lineWidth: 2,
+            lineWidth: 1.2,
             crosshairMarkerVisible: false,
             priceLineVisible: false,
         });
@@ -567,6 +569,8 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
             layout: {
                 background: { type: ColorType.Solid, color: 'white' },
                 textColor: '#666',
+                fontSize: 11,
+                attributionLogo: false,
             },
             grid: {
                 vertLines: { color: '#f0f3fa' },
@@ -581,7 +585,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
                     top: 0.1,
                     bottom: 0.02,
                 },
-                minimumWidth: 100,
+                minimumWidth: 62,
             },
             timeScale: {
                 visible: false,
@@ -601,6 +605,8 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
             layout: {
                 background: { type: ColorType.Solid, color: 'white' },
                 textColor: '#666',
+                fontSize: 11,
+                attributionLogo: false,
             },
             grid: {
                 vertLines: { color: '#f0f3fa' },
@@ -615,7 +621,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
                     top: 0.1,
                     bottom: 0.1,
                 },
-                minimumWidth: 100,
+                minimumWidth: 62,
             },
             timeScale: {
                 visible: false,
@@ -624,8 +630,8 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
         });
         macdChartRef.current = macdChart;
 
-        const macdLine = macdChart.addSeries(LineSeries, { color: '#2962FF', lineWidth: 2, priceLineVisible: false });
-        const macdSignal = macdChart.addSeries(LineSeries, { color: '#FF6D00', lineWidth: 2, priceLineVisible: false });
+        const macdLine = macdChart.addSeries(LineSeries, { color: '#2962FF', lineWidth: 1.2, priceLineVisible: false });
+        const macdSignal = macdChart.addSeries(LineSeries, { color: '#FF6D00', lineWidth: 1.2, priceLineVisible: false });
         const macdHist = macdChart.addSeries(HistogramSeries, { priceLineVisible: false });
 
         macdLineRef.current = macdLine;
@@ -672,7 +678,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
                 const time = param.time;
                 targets.forEach(t => {
                     if (!t.chart || !t.series) return;
-                    
+
                     let price = 0;
                     const dataIndex = dataRef.current.findIndex(d => d.time === time);
                     if (dataIndex !== -1) {
@@ -731,12 +737,12 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
                 });
             }
         });
-        
+
         resizeObserver.observe(mainContainerRef.current);
 
         return () => {
             resizeObserver.disconnect();
-            
+
             mainChart.timeScale().unsubscribeVisibleLogicalRangeChange(onMainTimeChange);
             volumeChart.timeScale().unsubscribeVisibleLogicalRangeChange(onVolumeTimeChange);
             macdChart.timeScale().unsubscribeVisibleLogicalRangeChange(onMacdTimeChange);
@@ -765,15 +771,15 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
         if (data.length > 0 && seriesRef.current && volumeRef.current && macdLineRef.current) {
             dataRef.current = data;
             const candleData = data.map(d => ({ time: d.time, open: d.open, high: d.high, low: d.low, close: d.close }));
-            const volumeData = data.map(d => ({ 
-                time: d.time, 
-                value: d.value, 
-                color: d.close > d.open ? 'rgba(38, 166, 154, 0.5)' : 'rgba(239, 83, 80, 0.5)' 
+            const volumeData = data.map(d => ({
+                time: d.time,
+                value: d.value,
+                color: d.close > d.open ? 'rgba(38, 166, 154, 0.5)' : 'rgba(239, 83, 80, 0.5)'
             }));
-            
+
             seriesRef.current.setData(candleData);
             volumeRef.current.setData(volumeData);
-            
+
             const sma10Data = calculateSMA(data, 10);
             const sma20Data = calculateSMA(data, 20);
             sma10Ref.current.setData(sma10Data);
@@ -824,7 +830,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
                     const count = Math.min(data.length, isMobile ? 50 : 100);
                     const chartInstance = mainChartRef.current;
                     const dataLength = data.length;
-                    
+
                     setTimeout(() => {
                         if (mainChartRef.current === chartInstance) {
                             try {
@@ -855,7 +861,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
     useEffect(() => {
         if (sma10Ref.current) sma10Ref.current.applyOptions({ visible: indicators.sma10 });
         if (sma20Ref.current) sma20Ref.current.applyOptions({ visible: indicators.sma20 });
-        
+
         if (bbUpperRef.current) bbUpperRef.current.applyOptions({ visible: indicators.bollinger });
         if (bbLowerRef.current) bbLowerRef.current.applyOptions({ visible: indicators.bollinger });
         if (bbFillPrimitiveRef.current) {
@@ -906,16 +912,16 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
     }, [indicators, volumeHeight, macdHeight]);
 
     return (
-        <div className="absolute top-0 left-0 right-0 bottom-12 md:bottom-0 flex flex-col p-0 bg-white select-none gap-0">
+        <div className="absolute top-0 left-0 right-0 bottom-0 flex flex-col p-0 bg-white select-none gap-0">
             {/* Vùng đồ thị giá */}
-            <div 
-                ref={mainContainerRef} 
+            <div
+                ref={mainContainerRef}
                 className="flex-grow w-full overflow-hidden relative bg-white"
             />
-            
+
             {/* Thanh phân cách siêu mỏng như chỉ (Giá - Volume) */}
             {indicators.volume && (
-                <div 
+                <div
                     onMouseDown={startDragVolume}
                     onTouchStart={startDragVolume}
                     className="h-[1px] w-full bg-gray-200 relative select-none z-20"
@@ -925,23 +931,19 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
             )}
 
             {/* Vùng đồ thị Volume */}
-            <div 
-                className={`relative w-full overflow-hidden bg-white ${
-                    indicators.volume ? 'block' : 'hidden'
-                }`} 
-                style={{ 
+            <div
+                className={`relative w-full overflow-hidden bg-white ${indicators.volume ? 'block' : 'hidden'
+                    }`}
+                style={{
                     height: indicators.volume ? `${volumeHeight}px` : '0px',
                 }}
             >
                 <div ref={volumeContainerRef} className="w-full h-full" />
-                <div className="absolute top-1.5 left-2.5 z-10 text-[9px] font-bold text-gray-500 bg-white/80 backdrop-blur px-1.5 py-0.5 rounded border border-gray-200/50 pointer-events-none uppercase tracking-wider">
-                    Volume - Khối lượng
-                </div>
             </div>
 
             {/* Thanh phân cách siêu mỏng như chỉ (Volume/Giá - MACD) */}
             {indicators.macd && (
-                <div 
+                <div
                     onMouseDown={startDragMacd}
                     onTouchStart={startDragMacd}
                     className="h-[1px] w-full bg-gray-200 relative select-none z-20"
@@ -951,18 +953,14 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
             )}
 
             {/* Vùng đồ thị MACD */}
-            <div 
-                className={`relative w-full overflow-hidden bg-white ${
-                    indicators.macd ? 'block' : 'hidden'
-                }`} 
-                style={{ 
+            <div
+                className={`relative w-full overflow-hidden bg-white ${indicators.macd ? 'block' : 'hidden'
+                    }`}
+                style={{
                     height: indicators.macd ? `${macdHeight}px` : '0px',
                 }}
             >
                 <div ref={macdContainerRef} className="w-full h-full" />
-                <div className="absolute top-1.5 left-2.5 z-10 text-[9px] font-bold text-gray-500 bg-white/80 backdrop-blur px-1.5 py-0.5 rounded border border-gray-200/50 pointer-events-none uppercase tracking-wider">
-                    MACD (12, 26, 9)
-                </div>
             </div>
         </div>
     );

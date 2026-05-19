@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Settings, Expand, LayoutGrid, ChevronDown, Star, Menu, Eye, EyeOff, ChevronUp, BookOpen, Zap } from 'lucide-react';
 import { TVChart } from './components/TVChart';
-import { fetchOHLCV } from './services/api';
+import { fetchOHLCV, fetchCompanyInfo } from './services/api';
 import { WatchlistSidebar } from './components/WatchlistSidebar';
 import { SessionPanel } from './components/SessionPanel';
 
@@ -19,12 +19,77 @@ const RESOLUTIONS = [
   { label: '1 tháng', value: '1M', group: 'NGÀY' },
 ];
 
+const SYMBOL_NAMES: { [key: string]: string } = {
+  'VNINDEX': 'Chỉ số VN-Index',
+  'VN30': 'Chỉ số VN30-Index',
+  'HNX': 'Chỉ số HNX-Index',
+  'UPCOM': 'Chỉ số UPCoM-Index',
+  'FPT': 'Công ty Cổ phần FPT',
+  'HPG': 'Công ty Cổ phần Tập đoàn Hòa Phát',
+  'VIC': 'Tập đoàn Vingroup',
+  'VHM': 'Công ty Cổ phần Vinhomes',
+  'VNM': 'Công ty Cổ phần Sữa Việt Nam',
+  'TCB': 'Ngân hàng TMCP Kỹ thương Việt Nam',
+  'VCB': 'Ngân hàng TMCP Ngoại thương Việt Nam',
+  'SSI': 'Công ty Cổ phần Chứng khoán SSI',
+  'VND': 'Công ty Cổ phần Chứng khoán VNDIRECT',
+  'MWG': 'Công ty Cổ phần Đầu tư Thế giới Di động',
+  'MBB': 'Ngân hàng TMCP Quân đội',
+  'STB': 'Ngân hàng TMCP Sài Gòn Thương Tín',
+  'ACB': 'Ngân hàng TMCP Á Châu',
+  'VPB': 'Ngân hàng TMCP Việt Nam Thịnh Vượng',
+  'HDB': 'Ngân hàng TMCP Phát triển TP.HCM',
+  'CTG': 'Ngân hàng TMCP Công Thương Việt Nam',
+  'BID': 'Ngân hàng TMCP Đầu tư và Phát triển Việt Nam',
+  'MSN': 'Công ty Cổ phần Tập đoàn Masan',
+  'GAS': 'Tổng Công ty Khí Việt Nam',
+  'POW': 'Tổng Công ty Điện lực Dầu khí Việt Nam',
+  'PLX': 'Tập đoàn Xăng dầu Việt Nam',
+  'VJC': 'Công ty Cổ phần Hàng không Vietjet',
+  'SAB': 'Tổng Công ty Cổ phần Bia - Rượu - Nước giải khát Sài Gòn',
+  'BVH': 'Tập đoàn Bảo Việt',
+  'GVR': 'Tập đoàn Công nghiệp Cao su Việt Nam',
+  'SHB': 'Ngân hàng TMCP Sài Gòn - Hà Nội',
+  'SSB': 'Ngân hàng TMCP Đông Nam Á',
+  'VIB': 'Ngân hàng TMCP Quốc tế Việt Nam',
+  'LPB': 'Ngân hàng TMCP Lộc Phát Việt Nam',
+  'TPB': 'Ngân hàng TMCP Tiên Phong',
+};
+
 function App() {
-  const [symbol, setSymbol] = useState('FPT');
-  const [searchInput, setSearchInput] = useState('FPT');
+  const [symbol, setSymbol] = useState('VNINDEX');
+  const [searchInput, setSearchInput] = useState('VNINDEX');
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [resolution, setResolution] = useState(RESOLUTIONS.find(r => r.isDefault)!);
+  const [fullName, setFullName] = useState('Chỉ số VN-Index');
+  const [showIndicatorsMenu, setShowIndicatorsMenu] = useState(false);
+
+  useEffect(() => {
+    if (SYMBOL_NAMES[symbol]) {
+      setFullName(SYMBOL_NAMES[symbol]);
+      return;
+    }
+
+    setFullName(symbol);
+
+    const loadCompanyInfo = async () => {
+      try {
+        const info = await fetchCompanyInfo(symbol);
+        if (info) {
+          const name = info.name || info.fullName;
+          if (name && name.length > 5) {
+            setFullName(name);
+          } else {
+            setFullName(info.shortName || symbol);
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi tải thông tin doanh nghiệp:", error);
+      }
+    };
+    loadCompanyInfo();
+  }, [symbol]);
 
   const [showTimeframeMenu, setShowTimeframeMenu] = useState(false);
 
@@ -33,8 +98,8 @@ function App() {
   const [sessionPanelOpen, setSessionPanelOpen] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState<'chart' | 'session'>('chart');
 
-  // Trạng thái cho chú thích & chỉ báo
-  const [legendExpanded, setLegendExpanded] = useState(true);
+  // Trạng thái cho chỉ báo
+  const [legendExpanded, setLegendExpanded] = useState(false);
   const [indicators, setIndicators] = useState({
     sma10: true,
     sma20: true,
@@ -288,7 +353,7 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-full bg-white text-[#131722] font-sans overflow-hidden">
+    <div className="flex flex-col h-[100dvh] w-full bg-white text-[#131722] font-sans overflow-hidden pb-[calc(env(safe-area-inset-bottom)+14px)] md:pb-0">
       {/* TOP TOOLBAR - Tương thích Mobile */}
       <div className="h-12 md:h-14 border-b border-gray-200 flex items-center justify-between px-2 md:px-4 text-xs md:text-sm bg-white shrink-0 relative z-50">
         <div className="flex items-center gap-2 md:gap-4 shrink-0">
@@ -316,7 +381,14 @@ function App() {
             <input
               className="w-14 md:w-20 font-bold bg-transparent outline-none uppercase text-base md:text-sm"
               value={searchInput}
-              onChange={e => setSearchInput(e.target.value)}
+              onChange={e => {
+                const val = e.target.value;
+                setSearchInput(val);
+                const cleaned = val.trim().toUpperCase();
+                if (cleaned.length >= 3) {
+                  setSymbol(cleaned);
+                }
+              }}
               placeholder="MÃ CK"
             />
           </form>
@@ -353,6 +425,74 @@ function App() {
                     ))}
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+
+          <div className="h-4 w-[1px] bg-gray-300 mx-1"></div>
+
+          {/* Indicators Dropdown (Bật/Tắt các chỉ báo kỹ thuật) */}
+          <div className="relative">
+            <div
+              className="flex items-center gap-1 md:gap-2 px-2 hover:bg-gray-100 rounded py-1 md:py-1.5 cursor-pointer font-semibold text-gray-700"
+              onClick={() => setShowIndicatorsMenu(!showIndicatorsMenu)}
+            >
+              <Eye size={15} className="text-gray-500" />
+              <span className="text-xs md:text-sm hidden sm:inline">Chỉ báo</span>
+              <ChevronDown size={14} className="text-gray-500" />
+            </div>
+
+            {showIndicatorsMenu && (
+              <div className="absolute top-full mt-1 left-0 bg-white border border-gray-200 shadow-xl rounded py-2 w-48 md:w-52 z-50 text-xs md:text-sm select-none font-sans overflow-hidden">
+                <div className="px-3 py-1 text-[10px] md:text-xs text-gray-400 font-bold bg-gray-50 border-b border-gray-100 mb-1">CÁC CHỈ BÁO</div>
+
+                {/* SMA 10 */}
+                <div
+                  onClick={() => toggleIndicator('sma10')}
+                  className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center transition-colors font-medium text-gray-700"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 bg-blue-600 rounded-full"></span>
+                    MA Cross 10
+                  </span>
+                  {indicators.sma10 ? <Eye size={14} className="text-blue-600" /> : <EyeOff size={14} className="text-gray-400" />}
+                </div>
+
+                {/* SMA 20 */}
+                <div
+                  onClick={() => toggleIndicator('sma20')}
+                  className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center transition-colors font-medium text-gray-700"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 bg-orange-500 rounded-full"></span>
+                    MA Cross 20
+                  </span>
+                  {indicators.sma20 ? <Eye size={14} className="text-orange-500" /> : <EyeOff size={14} className="text-gray-400" />}
+                </div>
+
+                {/* MACD */}
+                <div
+                  onClick={() => toggleIndicator('macd')}
+                  className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center transition-colors font-medium text-gray-700"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 bg-purple-600 rounded-full"></span>
+                    MACD
+                  </span>
+                  {indicators.macd ? <Eye size={14} className="text-purple-600" /> : <EyeOff size={14} className="text-gray-400" />}
+                </div>
+
+                {/* Bollinger Bands */}
+                <div
+                  onClick={() => toggleIndicator('bollinger')}
+                  className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center transition-colors font-medium text-gray-700"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 bg-teal-600 rounded-full"></span>
+                    Fansi Band
+                  </span>
+                  {indicators.bollinger ? <Eye size={14} className="text-teal-600" /> : <EyeOff size={14} className="text-gray-400" />}
+                </div>
               </div>
             )}
           </div>
@@ -424,8 +564,8 @@ function App() {
                   <span className={`font-extrabold ${tradeSummary.status === 'BÁO MUA' ? 'text-[#2962FF]' : 'text-[#E91E63]'}`}>
                     {tradeSummary.status} {tradeSummary.status === 'BÁO MUA' ? tradeSummary.entryPrice : tradeSummary.sellPrice}
                     <span className="text-[10px] text-gray-500 font-bold ml-1.5 bg-gray-100 px-1 py-0.5 rounded border border-gray-200/50">
-                      {tradeSummary.status === 'BÁO MUA' 
-                        ? tradeSummary.date.split('-').reverse().join('/') 
+                      {tradeSummary.status === 'BÁO MUA'
+                        ? tradeSummary.date.split('-').reverse().join('/')
                         : tradeSummary.sellDate.split('-').reverse().join('/')
                       }
                     </span>
@@ -451,80 +591,67 @@ function App() {
             {/* CỘT 2: MAIN CHART AREA (GIỮA) */}
             <div className={`flex-1 flex flex-col relative bg-white overflow-hidden ${mobileActiveTab === 'chart' ? 'flex' : 'hidden md:flex'
               }`}>
-              {/* Chart Header Info (Chú thích & Bật/Tắt) */}
-              <div className="absolute top-2 left-2 md:top-3 md:left-4 z-10 pointer-events-auto flex flex-col items-start p-1.5 md:p-2 bg-white/60 rounded-lg backdrop-blur shadow-sm border border-gray-100">
-                {/* Tên mã và khung giờ */}
-                <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm flex-wrap cursor-default">
-                  <span className="font-extrabold text-xl md:text-2xl tracking-tight text-gray-800 drop-shadow-sm">{symbol}</span>
-                  <span className="text-gray-500 font-medium px-1.5 py-0.5 bg-gray-100 rounded text-[10px] md:text-xs">{resolution.label}</span>
-
-                  {/* Glowing Green LIVE badge indicating real-time updates */}
-                  <span className="flex items-center gap-1 bg-green-50 text-green-700 font-bold px-2 py-0.5 rounded-full text-[9px] md:text-[10px] border border-green-200/40 shadow-sm shrink-0">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
-                    </span>
-                    <span>LIVE</span>
-                  </span>
-
-                  <div
-                    className="p-1 hover:bg-gray-200/80 rounded cursor-pointer text-gray-500 transition-colors ml-1"
-                    onClick={() => setLegendExpanded(!legendExpanded)}
+              {/* Chart Header Info (Chỉ hiển thị Bật/Tắt Chỉ báo, hỗ trợ Thu nhỏ/Mở rộng) */}
+              <div className="absolute top-2 left-2 md:top-3 md:left-4 z-10 pointer-events-auto flex items-center bg-white/90 backdrop-blur shadow-sm border border-gray-200/80 rounded-lg p-1 select-none transition-all duration-200 hover:bg-white">
+                {!legendExpanded ? (
+                  <button
+                    onClick={() => setLegendExpanded(true)}
+                    className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-gray-700 hover:text-blue-600 transition-colors"
                   >
-                    <ChevronUp size={16} className={`transform transition-transform ${legendExpanded ? 'rotate-0' : 'rotate-180'}`} />
-                  </div>
-                </div>
+                    <Eye size={14} className="text-gray-500" />
 
-                {/* OHLC Values */}
-                {latestData && legendExpanded && (
-                  <div className="flex gap-2 md:gap-3 text-[10px] md:text-xs font-semibold mt-1.5 ml-1">
-                    <span className="text-gray-500">O<span className={`ml-1 ${getColor(latestData.open, prevData?.close)}`}>{latestData.open.toFixed(2)}</span></span>
-                    <span className="text-gray-500">H<span className={`ml-1 ${getColor(latestData.high, prevData?.close)}`}>{latestData.high.toFixed(2)}</span></span>
-                    <span className="text-gray-500">L<span className={`ml-1 ${getColor(latestData.low, prevData?.close)}`}>{latestData.low.toFixed(2)}</span></span>
-                    <span className="text-gray-500">C<span className={`ml-1 ${getColor(latestData.close, prevData?.close)}`}>{latestData.close.toFixed(2)}</span></span>
-                  </div>
-                )}
-
-                {/* Danh sách Chỉ báo (Bật/Tắt) */}
-                {legendExpanded && (
-                  <div className="flex flex-col mt-2 gap-0.5 ml-1 select-none">
-
-                    {/* SMA 10 Toggle */}
-                    {latestSma10 && (
-                      <div className="flex items-center gap-2 text-[10px] md:text-xs group hover:bg-gray-100/50 p-1 rounded">
-                        <div onClick={() => toggleIndicator('sma10')} className="cursor-pointer opacity-50 group-hover:opacity-100 transition-opacity">
-                          {indicators.sma10 ? <Eye size={14} className="text-blue-600" /> : <EyeOff size={14} className="text-gray-400" />}
-                        </div>
-                        <span className={`font-semibold ${indicators.sma10 ? 'text-blue-600' : 'text-gray-400'}`}>MA Cross 10</span>
-                        <span className="text-gray-600 font-medium">{latestSma10.toFixed(2)}</span>
-                      </div>
-                    )}
-
-                    {/* SMA 20 Toggle */}
-                    {latestSma20 && (
-                      <div className="flex items-center gap-2 text-[10px] md:text-xs group hover:bg-gray-100/50 p-1 rounded">
-                        <div onClick={() => toggleIndicator('sma20')} className="cursor-pointer opacity-50 group-hover:opacity-100 transition-opacity">
-                          {indicators.sma20 ? <Eye size={14} className="text-blue-600" /> : <EyeOff size={14} className="text-gray-400" />}
-                        </div>
-                        <span className={`font-semibold ${indicators.sma20 ? 'text-orange-500' : 'text-gray-400'}`}>MA Cross 20</span>
-                        <span className="text-gray-600 font-medium">{latestSma20.toFixed(2)}</span>
-                      </div>
-                    )}
-
-                    {/* MACD Toggle */}
-                    <div className="flex items-center gap-2 text-[10px] md:text-xs group hover:bg-gray-100/50 p-1 rounded">
-                      <div onClick={() => toggleIndicator('macd')} className="cursor-pointer opacity-50 group-hover:opacity-100 transition-opacity">
-                        {indicators.macd ? <Eye size={14} className="text-blue-600" /> : <EyeOff size={14} className="text-gray-400" />}
-                      </div>
-                      <span className={`font-semibold ${indicators.macd ? 'text-purple-600' : 'text-gray-400'}`}>MACD (12, 26, 9)</span>
+                    <ChevronDown size={14} className="text-gray-400 ml-0.5" />
+                  </button>
+                ) : (
+                  <div className="flex flex-col p-1">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-1 mb-1.5 gap-6">
+                      <span className="text-[10px] md:text-xs font-extrabold text-gray-400 uppercase tracking-wider">CÁC CHỈ BÁO</span>
+                      <button
+                        onClick={() => setLegendExpanded(false)}
+                        className="p-0.5 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-700 transition-all"
+                        title="Thu nhỏ"
+                      >
+                        <ChevronUp size={14} />
+                      </button>
                     </div>
+                    <div className="flex flex-col gap-0.5 w-full">
+                      {/* SMA 10 Toggle */}
+                      {latestSma10 && (
+                        <div className="flex items-center gap-2 text-[10px] md:text-xs group hover:bg-gray-100/50 p-1 rounded">
+                          <div onClick={() => toggleIndicator('sma10')} className="cursor-pointer opacity-50 group-hover:opacity-100 transition-opacity">
+                            {indicators.sma10 ? <Eye size={14} className="text-blue-600" /> : <EyeOff size={14} className="text-gray-400" />}
+                          </div>
+                          <span className={`font-semibold ${indicators.sma10 ? 'text-blue-600' : 'text-gray-400'}`}>MA Cross 10</span>
+                          <span className="text-gray-600 font-medium">{latestSma10.toFixed(2)}</span>
+                        </div>
+                      )}
 
-                    {/* Bollinger Bands Toggle */}
-                    <div className="flex items-center gap-2 text-[10px] md:text-xs group hover:bg-gray-100/50 p-1 rounded">
-                      <div onClick={() => toggleIndicator('bollinger')} className="cursor-pointer opacity-50 group-hover:opacity-100 transition-opacity">
-                        {indicators.bollinger ? <Eye size={14} className="text-teal-600" /> : <EyeOff size={14} className="text-gray-400" />}
+                      {/* SMA 20 Toggle */}
+                      {latestSma20 && (
+                        <div className="flex items-center gap-2 text-[10px] md:text-xs group hover:bg-gray-100/50 p-1 rounded">
+                          <div onClick={() => toggleIndicator('sma20')} className="cursor-pointer opacity-50 group-hover:opacity-100 transition-opacity">
+                            {indicators.sma20 ? <Eye size={14} className="text-[#e28743]" /> : <EyeOff size={14} className="text-gray-400" />}
+                          </div>
+                          <span className={`font-semibold ${indicators.sma20 ? 'text-orange-500' : 'text-gray-400'}`}>MA Cross 20</span>
+                          <span className="text-gray-600 font-medium">{latestSma20.toFixed(2)}</span>
+                        </div>
+                      )}
+
+                      {/* MACD Toggle */}
+                      <div className="flex items-center gap-2 text-[10px] md:text-xs group hover:bg-gray-100/50 p-1 rounded">
+                        <div onClick={() => toggleIndicator('macd')} className="cursor-pointer opacity-50 group-hover:opacity-100 transition-opacity">
+                          {indicators.macd ? <Eye size={14} className="text-purple-600" /> : <EyeOff size={14} className="text-gray-400" />}
+                        </div>
+                        <span className={`font-semibold ${indicators.macd ? 'text-purple-600' : 'text-gray-400'}`}>MACD (12, 26, 9)</span>
                       </div>
-                      <span className={`font-semibold ${indicators.bollinger ? 'text-teal-600' : 'text-gray-400'}`}>Fansi Band 20, 2</span>
+
+                      {/* Bollinger Bands Toggle */}
+                      <div className="flex items-center gap-2 text-[10px] md:text-xs group hover:bg-gray-100/50 p-1 rounded">
+                        <div onClick={() => toggleIndicator('bollinger')} className="cursor-pointer opacity-50 group-hover:opacity-100 transition-opacity">
+                          {indicators.bollinger ? <Eye size={14} className="text-teal-600" /> : <EyeOff size={14} className="text-gray-400" />}
+                        </div>
+                        <span className={`font-semibold ${indicators.bollinger ? 'text-teal-600' : 'text-gray-400'}`}>Fansi Band 20, 2</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -535,6 +662,12 @@ function App() {
                 <div className="hidden md:block absolute top-3 right-16 md:right-20 z-20 select-none">
                   <table className="border-collapse text-[10px] md:text-xs font-bold bg-[#f7fdfd]/95 backdrop-blur-sm border border-[#a2dcd6] shadow-lg rounded-lg overflow-hidden text-gray-700 w-44 md:w-48">
                     <tbody>
+                      {/* Tên mã cổ phiếu đầy đủ không viết tắt */}
+                      <tr className="bg-indigo-50/90 border-b border-[#a2dcd6]">
+                        <td colSpan={2} className="px-2.5 py-2 text-center text-indigo-800 font-extrabold text-[10px] md:text-xs uppercase tracking-wide">
+                          {fullName}
+                        </td>
+                      </tr>
                       {/* Dòng Header */}
                       <tr className="bg-[#e2f7f5]/80">
                         <td className="px-2.5 py-1.5 border border-[#a2dcd6] text-center text-[#c2185b] font-extrabold tracking-wide text-xs">
@@ -647,21 +780,23 @@ function App() {
               )}
 
               {/* The Chart */}
-              <div className="flex-1 w-full h-full p-1 relative z-0">
+              <div className="flex-1 w-full h-full p-0 relative z-0">
                 <TVChart data={data} indicators={indicators} markers={markers} chartId={`${symbol}-${resolution.value}`} />
               </div>
             </div>
 
             {/* CỘT 3: SESSION DETAIL PANEL (BÊN PHẢI) */}
-            <div
-              className={`${sessionPanelOpen ? 'w-80 md:w-96 border-l border-gray-200' : 'w-0 overflow-hidden'
-                } h-full bg-white transition-all duration-300 shrink-0 ${mobileActiveTab === 'session'
-                  ? 'flex w-full z-30'
-                  : sessionPanelOpen ? 'hidden md:flex' : 'hidden'
-                }`}
-            >
-              <SessionPanel symbol={symbol} latestData={latestData} prevData={prevData} />
-            </div>
+            {mobileActiveTab === 'session' ? (
+              <div className="w-full h-full bg-white z-30 flex shrink-0">
+                <SessionPanel symbol={symbol} latestData={latestData} prevData={prevData} />
+              </div>
+            ) : (
+              sessionPanelOpen && (
+                <div className="hidden md:flex w-80 md:w-96 border-l border-gray-200 h-full bg-white transition-all duration-300 shrink-0">
+                  <SessionPanel symbol={symbol} latestData={latestData} prevData={prevData} />
+                </div>
+              )
+            )}
           </div>
         </div>
       </div>

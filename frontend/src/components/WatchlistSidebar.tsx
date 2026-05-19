@@ -150,12 +150,12 @@ export const WatchlistSidebar: React.FC<ScreenerSidebarProps> = ({
             </div>
 
             {/* Table Header */}
-            <div className="flex w-full bg-[#0066b3] text-white text-[10px] md:text-[11px] font-bold text-center border-b border-gray-200 sticky top-0 z-10 shadow-sm shrink-0">
-                <div className="w-[20%] py-2.5 px-0.5 border-r border-[#1a75bc] flex items-center justify-center gap-1 shrink-0">MÃ <span className="opacity-50">▲</span></div>
-                <div className="w-[24%] py-2.5 px-0.5 border-r border-[#1a75bc] flex items-center justify-center gap-1 shrink-0">TÍN HIỆU <span className="opacity-50">▼</span></div>
-                <div className="w-[20%] py-2.5 px-0.5 border-r border-[#1a75bc] flex items-center justify-center gap-1 shrink-0">GIÁ BÁO <span className="opacity-50">▲</span></div>
-                <div className="w-[20%] py-2.5 px-0.5 border-r border-[#1a75bc] flex items-center justify-center gap-1 shrink-0">(%) <span className="opacity-50">▲</span></div>
-                <div className="w-[16%] py-2.5 px-0.5 flex items-center justify-center gap-1 shrink-0">T+ <span className="opacity-50">▲</span></div>
+            <div className="grid grid-cols-[20%_24%_20%_20%_16%] w-full bg-[#0066b3] text-white text-[10px] md:text-[11px] font-bold text-center border-b border-gray-200 sticky top-0 z-10 shadow-sm shrink-0">
+                <div className="py-2.5 px-0.5 border-r border-[#1a75bc] flex items-center justify-center gap-1 shrink-0">MÃ <span className="opacity-50">▲</span></div>
+                <div className="py-2.5 px-0.5 border-r border-[#1a75bc] flex items-center justify-center gap-1 shrink-0">TÍN HIỆU <span className="opacity-50">▼</span></div>
+                <div className="py-2.5 px-0.5 border-r border-[#1a75bc] flex items-center justify-center gap-1 shrink-0">GIÁ BÁO <span className="opacity-50">▲</span></div>
+                <div className="py-2.5 px-0.5 border-r border-[#1a75bc] flex items-center justify-center gap-1 shrink-0">(%) <span className="opacity-50">▲</span></div>
+                <div className="py-2.5 px-0.5 flex items-center justify-center gap-1 shrink-0">T+ <span className="opacity-50">▲</span></div>
             </div>
 
             {/* Data List - Hỗ trợ Cuộn vô hạn ngầm (Infinite Scroll / Lazy Rendering) */}
@@ -176,32 +176,32 @@ export const WatchlistSidebar: React.FC<ScreenerSidebarProps> = ({
                             <div 
                                 key={item.symbol}
                                 onClick={() => onSelectSymbol(item.symbol)}
-                                className={`flex w-full text-center items-center text-xs cursor-pointer transition-colors hover:bg-[#f0f8ff] ${activeSymbol === item.symbol ? 'bg-blue-50 ring-1 ring-blue-500 inset-0 relative z-10' : (idx % 2 === 0 ? 'bg-white' : 'bg-[#fcfcfc]')}`}
+                                className={`grid grid-cols-[20%_24%_20%_20%_16%] w-full text-center items-center text-xs cursor-pointer transition-colors hover:bg-[#f0f8ff] ${activeSymbol === item.symbol ? 'bg-blue-50 ring-1 ring-blue-500 inset-0 relative z-10' : (idx % 2 === 0 ? 'bg-white' : 'bg-[#fcfcfc]')}`}
                             >
                                 {/* Cột 1: MÃ */}
-                                <div className="w-[20%] py-2.5 px-0.5 font-bold text-[#2e5eb9] text-[11px] md:text-[13px] border-r border-gray-100 shrink-0">
+                                <div className="py-2.5 px-0.5 font-bold text-[#2e5eb9] text-[11px] md:text-[13px] border-r border-gray-100 shrink-0">
                                     {item.symbol}
                                 </div>
                                 
                                 {/* Cột 2: TÍN HIỆU */}
-                                <div className="w-[24%] py-1 px-1 border-r border-gray-100 h-full flex items-center justify-center bg-blue-50/20 shrink-0">
+                                <div className="py-1 px-1 border-r border-gray-100 h-full flex items-center justify-center bg-blue-50/20 shrink-0">
                                     <div className={`w-full py-1.5 rounded-sm font-extrabold text-[10px] md:text-[11px] shadow-sm tracking-wide ${getSignalColor(item.signal)}`}>
                                         {item.signal === 'NONE' ? 'QUAN SÁT' : item.signal}
                                     </div>
                                 </div>
 
                                 {/* Cột 3: GIÁ BÁO */}
-                                <div className="w-[20%] py-2.5 px-0.5 font-semibold text-gray-700 text-[11px] md:text-xs border-r border-gray-100 bg-gray-50/30 shrink-0">
+                                <div className="py-2.5 px-0.5 font-semibold text-gray-700 text-[11px] md:text-xs border-r border-gray-100 bg-gray-50/30 shrink-0">
                                     {item.price.toFixed(2)}
                                 </div>
 
                                 {/* Cột 4: (%) */}
-                                <div className={`w-[20%] py-2.5 px-0.5 font-bold text-[11px] md:text-xs border-r border-gray-100 shrink-0 ${item.profit > 0 ? 'text-[#10b981]' : (item.profit < 0 ? 'text-[#ef4444]' : 'text-gray-500')}`}>
+                                <div className={`py-2.5 px-0.5 font-bold text-[11px] md:text-xs border-r border-gray-100 shrink-0 ${item.profit > 0 ? 'text-[#10b981]' : (item.profit < 0 ? 'text-[#ef4444]' : 'text-gray-500')}`}>
                                     {item.profit > 0 ? `+${item.profit.toFixed(1)}%` : `${item.profit.toFixed(1)}%`}
                                 </div>
 
                                 {/* Cột 5: T+ */}
-                                <div className="w-[16%] py-2.5 px-0.5 font-semibold text-gray-800 text-[11px] md:text-xs bg-gray-50/50 shrink-0">
+                                <div className="py-2.5 px-0.5 font-semibold text-gray-800 text-[11px] md:text-xs bg-gray-50/50 shrink-0">
                                     {item.tPlus !== null ? `T+${item.tPlus}` : '-'}
                                 </div>
                             </div>
