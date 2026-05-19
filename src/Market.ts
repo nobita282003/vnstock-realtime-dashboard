@@ -87,7 +87,9 @@ export class Market {
 
                     return result;
                 } catch (error: any) {
-                    console.error("Lỗi khi tải dữ liệu OHLCV:", error.message);
+                    if (error.response?.status !== 400) {
+                        console.error(`Lỗi khi tải dữ liệu OHLCV (${symbol}):`, error.message);
+                    }
                     return [];
                 }
             }

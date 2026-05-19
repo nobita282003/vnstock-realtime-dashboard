@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType, CandlestickSeries, HistogramSeries, LineSeries } from 'lightweight-charts';
 import type { IChartApi, ISeriesPrimitive, IPrimitivePaneView, IPrimitivePaneRenderer } from 'lightweight-charts';
 
-// Custom Canvas Primitive to draw dynamic background color between Bollinger Bands
+// Render Bollinger Bands area color
 class BandAreaPaneRenderer implements IPrimitivePaneRenderer {
     private _upperPoints: any[] = [];
     private _lowerPoints: any[] = [];
@@ -28,7 +28,6 @@ class BandAreaPaneRenderer implements IPrimitivePaneRenderer {
                     endIdx++;
                 }
 
-                // 1. Vẽ màu nền (fill) giữa hai dải với độ mờ vừa phải, đẹp mắt
                 ctx.fillStyle = currentTrend ? 'rgba(38, 166, 154, 0.12)' : 'rgba(239, 83, 80, 0.12)';
                 ctx.beginPath();
                 
@@ -44,7 +43,6 @@ class BandAreaPaneRenderer implements IPrimitivePaneRenderer {
                 ctx.closePath();
                 ctx.fill();
 
-                // 2. Vẽ đường biên dải trên (Upper Band Line) theo màu xu hướng
                 ctx.strokeStyle = currentTrend ? '#26a69a' : '#ef5350';
                 ctx.lineWidth = 1.5;
                 ctx.beginPath();
@@ -54,7 +52,6 @@ class BandAreaPaneRenderer implements IPrimitivePaneRenderer {
                 }
                 ctx.stroke();
 
-                // 3. Vẽ đường biên dải dưới (Lower Band Line) theo màu xu hướng
                 ctx.beginPath();
                 ctx.moveTo(this._lowerPoints[startIdx].x, this._lowerPoints[startIdx].y);
                 for (let i = startIdx + 1; i <= endIdx; i++) {
@@ -139,6 +136,7 @@ class BandAreaPrimitive implements ISeriesPrimitive {
     }
 }
 
+// Vẽ mũi tên MUA/BÁN
 class MarkersPaneRenderer implements IPrimitivePaneRenderer {
     private _points: any[] = [];
 
@@ -153,13 +151,12 @@ class MarkersPaneRenderer implements IPrimitivePaneRenderer {
 
             this._points.forEach(marker => {
                 const { x, yLow, yHigh, shape, color, text } = marker;
-                const offset = 24; // Đẩy mũi tên cách nến 24px để tạo khoảng thở cực kỳ dễ nhìn!
+                const offset = 24;
 
                 ctx.font = 'bold 10px Inter, Arial, sans-serif';
                 ctx.textAlign = 'center';
 
                 if (shape === 'arrowUp') {
-                    // Vẽ mũi tên MUA (arrowUp) chỉ lên, bắt đầu từ (yLow + offset)
                     const yTip = yLow + offset;
                     ctx.beginPath();
                     ctx.moveTo(x, yTip);
@@ -174,7 +171,6 @@ class MarkersPaneRenderer implements IPrimitivePaneRenderer {
                     ctx.fillStyle = color;
                     ctx.fill();
 
-                    // Vẽ chữ 'MUA' kèm giá bên dưới mũi tên, có stroke trắng bao quanh chống đè lên lưới
                     if (text) {
                         ctx.strokeStyle = '#ffffff';
                         ctx.lineWidth = 3;
@@ -184,7 +180,6 @@ class MarkersPaneRenderer implements IPrimitivePaneRenderer {
                         ctx.fillText(text, x, yTip + 16);
                     }
                 } else if (shape === 'arrowDown') {
-                    // Vẽ mũi tên BÁN (arrowDown) chỉ xuống, bắt đầu từ (yHigh - offset)
                     const yTip = yHigh - offset;
                     ctx.beginPath();
                     ctx.moveTo(x, yTip);
@@ -199,7 +194,6 @@ class MarkersPaneRenderer implements IPrimitivePaneRenderer {
                     ctx.fillStyle = color;
                     ctx.fill();
 
-                    // Vẽ chữ 'BÁN' kèm giá bên trên mũi tên, có stroke trắng bao quanh
                     if (text) {
                         ctx.strokeStyle = '#ffffff';
                         ctx.lineWidth = 3;
@@ -287,15 +281,13 @@ class MarkersPrimitive implements ISeriesPrimitive {
     }
 }
 
-// Tính toán Bollinger Bands
+// Tính Bollinger Bands
 function calculateBollingerBands(data: any[], period = 20, multiplier = 2) {
     const upper: any[] = [];
     const lower: any[] = [];
     
     for (let i = 0; i < data.length; i++) {
-        if (i < period - 1) {
-            continue;
-        }
+        if (i < period - 1) continue;
         
         let sum = 0;
         for (let j = 0; j < period; j++) {
@@ -315,7 +307,7 @@ function calculateBollingerBands(data: any[], period = 20, multiplier = 2) {
     return { upper, lower };
 }
 
-// Hàm tính toán Simple Moving Average (SMA)
+// Tính SMA
 function calculateSMA(data: any[], period: number) {
     const result = [];
     let sum = 0;
@@ -334,7 +326,7 @@ function calculateSMA(data: any[], period: number) {
 // Tính EMA cho MACD
 function calculateEMA(data: any[], period: number, sourceKey: string = 'close') {
     const k = 2 / (period + 1);
-    let emaData = [];
+    const emaData = [];
     let ema = data.length > 0 ? data[0][sourceKey] : 0;
     for (let i = 0; i < data.length; i++) {
         if (i === 0) {
@@ -351,16 +343,13 @@ function calculateEMA(data: any[], period: number, sourceKey: string = 'close') 
 function calculateMACD(data: any[]) {
     const ema12 = calculateEMA(data, 12);
     const ema26 = calculateEMA(data, 26);
-    let macd = [];
+    const macd = [];
     for (let i = 0; i < data.length; i++) {
-        macd.push({ time: data[i].time, value: ema12[i].value - ema26[i].value, close: ema12[i].value - ema26[i].value }); // map close để dùng cho EMA9
+        macd.push({ time: data[i].time, value: ema12[i].value - ema26[i].value, close: ema12[i].value - ema26[i].value });
     }
     
-    // signal = EMA 9 của MACD
     const signal = calculateEMA(macd, 9, 'close');
-    
-    // Histogram
-    let hist = [];
+    const hist = [];
     for (let i = 0; i < macd.length; i++) {
         const val = macd[i].value - signal[i].value;
         hist.push({ 
@@ -369,7 +358,7 @@ function calculateMACD(data: any[]) {
             color: val >= 0 ? '#26a69a' : '#ef5350'
         });
     }
-    return { macd: macd.map(d=>({time:d.time, value:d.value})), signal, hist };
+    return { macd: macd.map(d => ({ time: d.time, value: d.value })), signal, hist };
 }
 
 interface IndicatorsState {
@@ -388,32 +377,115 @@ interface TVChartProps {
 }
 
 export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = [], chartId = '' }) => {
-    const chartContainerRef = useRef<HTMLDivElement>(null);
-    const chartRef = useRef<IChartApi | null>(null);
+    const mainContainerRef = useRef<HTMLDivElement>(null);
+    const volumeContainerRef = useRef<HTMLDivElement>(null);
+    const macdContainerRef = useRef<HTMLDivElement>(null);
+
+    const mainChartRef = useRef<IChartApi | null>(null);
+    const volumeChartRef = useRef<IChartApi | null>(null);
+    const macdChartRef = useRef<IChartApi | null>(null);
+
     const seriesRef = useRef<any>(null);
     const volumeRef = useRef<any>(null);
     const sma10Ref = useRef<any>(null);
     const sma20Ref = useRef<any>(null);
     const markersPrimitiveRef = useRef<any>(null);
     
-    // Bollinger Bands refs
     const bbUpperRef = useRef<any>(null);
     const bbLowerRef = useRef<any>(null);
     const bbFillPrimitiveRef = useRef<any>(null);
     
-    // MACD refs
     const macdLineRef = useRef<any>(null);
     const macdSignalRef = useRef<any>(null);
     const macdHistRef = useRef<any>(null);
 
-    // Track Chart ID để tránh reset trạng thái biểu đồ
+    const dataRef = useRef<any[]>([]);
+    const macdDataRef = useRef<any[]>([]);
     const currentChartIdRef = useRef<string>('');
 
-    // Khởi tạo Chart
-    useEffect(() => {
-        if (!chartContainerRef.current) return;
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [volumeHeight, setVolumeHeight] = useState(isMobile ? 80 : 120);
+    const [macdHeight, setMacdHeight] = useState(isMobile ? 100 : 150);
 
-        const chart = createChart(chartContainerRef.current, {
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
+        setVolumeHeight(isMobile ? 80 : 120);
+        setMacdHeight(isMobile ? 100 : 150);
+    }, [isMobile]);
+
+    // Thao tác kéo giãn chiều cao khung Volume
+    const startDragVolume = (e: React.MouseEvent | React.TouchEvent) => {
+        const startY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+        const startVal = volumeHeight;
+
+        const handleMove = (moveEvent: MouseEvent | TouchEvent) => {
+            if ('touches' in moveEvent) {
+                moveEvent.preventDefault();
+            }
+            const currentY = 'touches' in moveEvent ? moveEvent.touches[0].clientY : moveEvent.clientY;
+            const delta = currentY - startY;
+            const nextHeight = Math.max(40, Math.min(250, startVal - delta));
+            setVolumeHeight(nextHeight);
+        };
+
+        const handleEnd = () => {
+            window.removeEventListener('mousemove', handleMove);
+            window.removeEventListener('mouseup', handleEnd);
+            window.removeEventListener('touchmove', handleMove);
+            window.removeEventListener('touchend', handleEnd);
+        };
+
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+        window.addEventListener('touchmove', handleMove, { passive: false });
+        window.addEventListener('touchend', handleEnd);
+    };
+
+    // Thao tác kéo giãn chiều cao khung MACD
+    const startDragMacd = (e: React.MouseEvent | React.TouchEvent) => {
+        const startY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+        const startVal = macdHeight;
+
+        const handleMove = (moveEvent: MouseEvent | TouchEvent) => {
+            if ('touches' in moveEvent) {
+                moveEvent.preventDefault();
+            }
+            const currentY = 'touches' in moveEvent ? moveEvent.touches[0].clientY : moveEvent.clientY;
+            const delta = currentY - startY;
+            const nextHeight = Math.max(40, Math.min(250, startVal - delta));
+            setMacdHeight(nextHeight);
+        };
+
+        const handleEnd = () => {
+            window.removeEventListener('mousemove', handleMove);
+            window.removeEventListener('mouseup', handleEnd);
+            window.removeEventListener('touchmove', handleMove);
+            window.removeEventListener('touchend', handleEnd);
+        };
+
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+        window.addEventListener('touchmove', handleMove, { passive: false });
+        window.addEventListener('touchend', handleEnd);
+    };
+
+    // Khởi tạo các biểu đồ và thiết lập đồng bộ hóa
+    useEffect(() => {
+        if (!mainContainerRef.current || !volumeContainerRef.current || !macdContainerRef.current) return;
+
+        // Cấu hình ngôn ngữ tiếng Việt cho trục ngày tháng
+        const vietnameseLocalization = {
+            locale: 'vi-VN',
+            dateFormat: 'dd/MM/yyyy',
+        };
+
+        // 1. Biểu đồ chính (Giá)
+        const mainChart = createChart(mainContainerRef.current, {
             layout: {
                 background: { type: ColorType.Solid, color: 'white' },
                 textColor: '#333',
@@ -422,23 +494,26 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
                 vertLines: { color: '#f0f3fa' },
                 horzLines: { color: '#f0f3fa' },
             },
-            width: chartContainerRef.current.clientWidth,
-            height: chartContainerRef.current.clientHeight,
+            localization: vietnameseLocalization,
+            width: mainContainerRef.current.clientWidth,
+            height: mainContainerRef.current.clientHeight,
             timeScale: {
                 timeVisible: true,
                 secondsVisible: false,
+                borderColor: '#dfebf0',
             },
             rightPriceScale: {
                 borderColor: '#dfebf0',
                 scaleMargins: {
                     top: 0.08,
-                    bottom: 0.35, // Giữ biểu đồ giá ở phần trên, nhường 35% khoảng dưới cho Volume và MACD cực kỳ đẹp mắt
+                    bottom: 0.08,
                 },
+                minimumWidth: 100,
             }
         });
-        chartRef.current = chart;
+        mainChartRef.current = mainChart;
 
-        const candlestickSeries = chart.addSeries(CandlestickSeries, {
+        const candlestickSeries = mainChart.addSeries(CandlestickSeries, {
             upColor: '#26a69a',
             downColor: '#ef5350',
             borderVisible: false,
@@ -447,12 +522,11 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
         });
         seriesRef.current = candlestickSeries;
 
-        const markersPrimitive = new MarkersPrimitive(chart, candlestickSeries);
+        const markersPrimitive = new MarkersPrimitive(mainChart, candlestickSeries);
         candlestickSeries.attachPrimitive(markersPrimitive);
         markersPrimitiveRef.current = markersPrimitive;
 
-        // Khởi tạo Bollinger Bands Series (Đặt trong suốt để nét vẽ của Canvas Primitive tự vẽ màu theo xu hướng)
-        const bbUpper = chart.addSeries(LineSeries, {
+        const bbUpper = mainChart.addSeries(LineSeries, {
             color: 'transparent',
             lineWidth: 1,
             crosshairMarkerVisible: false,
@@ -460,7 +534,7 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
         });
         bbUpperRef.current = bbUpper;
 
-        const bbLower = chart.addSeries(LineSeries, {
+        const bbLower = mainChart.addSeries(LineSeries, {
             color: 'transparent',
             lineWidth: 1,
             crosshairMarkerVisible: false,
@@ -468,78 +542,228 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
         });
         bbLowerRef.current = bbLower;
 
-        // Khởi tạo Canvas Primitive để vẽ màu nền xanh đỏ cho dải Bollinger
-        const bbFillPrimitive = new BandAreaPrimitive(chart, candlestickSeries);
+        const bbFillPrimitive = new BandAreaPrimitive(mainChart, candlestickSeries);
         candlestickSeries.attachPrimitive(bbFillPrimitive);
         bbFillPrimitiveRef.current = bbFillPrimitive;
 
-        const volumeSeries = chart.addSeries(HistogramSeries, {
-            color: '#26a69a',
-            priceFormat: { type: 'volume' },
-            priceScaleId: 'volume',
-        });
-        
-        // Volume 15% đáy và nâng lên một chút để tránh bị che bởi thanh điều hướng di động / watermark
-        chart.priceScale('volume').applyOptions({
-            scaleMargins: { top: 0.8, bottom: 0.08 },
-            visible: false,
-        });
-        volumeRef.current = volumeSeries;
-
-        const sma10 = chart.addSeries(LineSeries, {
-            color: '#2962FF', // Xanh dương cho MA10
+        const sma10 = mainChart.addSeries(LineSeries, {
+            color: '#2962FF',
             lineWidth: 2,
             crosshairMarkerVisible: false,
             priceLineVisible: false,
         });
         sma10Ref.current = sma10;
 
-        const sma20 = chart.addSeries(LineSeries, {
-            color: '#FF6D00', // Cam cho MA20
+        const sma20 = mainChart.addSeries(LineSeries, {
+            color: '#FF6D00',
             lineWidth: 2,
             crosshairMarkerVisible: false,
             priceLineVisible: false,
         });
         sma20Ref.current = sma20;
 
-        const macdLine = chart.addSeries(LineSeries, { color: '#2962FF', lineWidth: 2, priceScaleId: 'macd', priceLineVisible: false });
-        const macdSignal = chart.addSeries(LineSeries, { color: '#FF6D00', lineWidth: 2, priceScaleId: 'macd', priceLineVisible: false });
-        const macdHist = chart.addSeries(HistogramSeries, { priceScaleId: 'macd', priceLineVisible: false });
-        
-        // Cấu hình priceScale 'macd' và nâng lên một chút để tránh bị che khuất
-        chart.priceScale('macd').applyOptions({
-            scaleMargins: { top: 0.65, bottom: 0.08 },
-            visible: false,
+        // 2. Biểu đồ khối lượng (Volume)
+        const volumeChart = createChart(volumeContainerRef.current, {
+            layout: {
+                background: { type: ColorType.Solid, color: 'white' },
+                textColor: '#666',
+            },
+            grid: {
+                vertLines: { color: '#f0f3fa' },
+                horzLines: { color: '#f0f3fa' },
+            },
+            localization: vietnameseLocalization,
+            width: volumeContainerRef.current.clientWidth,
+            height: volumeContainerRef.current.clientHeight,
+            rightPriceScale: {
+                borderColor: '#dfebf0',
+                scaleMargins: {
+                    top: 0.1,
+                    bottom: 0.02,
+                },
+                minimumWidth: 100,
+            },
+            timeScale: {
+                visible: false,
+                borderColor: '#dfebf0',
+            },
         });
+        volumeChartRef.current = volumeChart;
+
+        const volumeSeries = volumeChart.addSeries(HistogramSeries, {
+            color: '#26a69a',
+            priceFormat: { type: 'volume' },
+        });
+        volumeRef.current = volumeSeries;
+
+        // 3. Biểu đồ MACD
+        const macdChart = createChart(macdContainerRef.current, {
+            layout: {
+                background: { type: ColorType.Solid, color: 'white' },
+                textColor: '#666',
+            },
+            grid: {
+                vertLines: { color: '#f0f3fa' },
+                horzLines: { color: '#f0f3fa' },
+            },
+            localization: vietnameseLocalization,
+            width: macdContainerRef.current.clientWidth,
+            height: macdContainerRef.current.clientHeight,
+            rightPriceScale: {
+                borderColor: '#dfebf0',
+                scaleMargins: {
+                    top: 0.1,
+                    bottom: 0.1,
+                },
+                minimumWidth: 100,
+            },
+            timeScale: {
+                visible: false,
+                borderColor: '#dfebf0',
+            },
+        });
+        macdChartRef.current = macdChart;
+
+        const macdLine = macdChart.addSeries(LineSeries, { color: '#2962FF', lineWidth: 2, priceLineVisible: false });
+        const macdSignal = macdChart.addSeries(LineSeries, { color: '#FF6D00', lineWidth: 2, priceLineVisible: false });
+        const macdHist = macdChart.addSeries(HistogramSeries, { priceLineVisible: false });
 
         macdLineRef.current = macdLine;
         macdSignalRef.current = macdSignal;
         macdHistRef.current = macdHist;
 
-        // Use ResizeObserver for responsive chart sizing (fixes container flex/sidebar resizing issues)
+        // Đồng bộ hóa khoảng thời gian (Zoom và Pan)
+        const isSyncingTimeScaleRef = { current: false };
+        const syncTimeScale = (getTargets: () => (IChartApi | null)[]) => {
+            return (range: any) => {
+                if (isSyncingTimeScaleRef.current || !range) return;
+                isSyncingTimeScaleRef.current = true;
+                getTargets().forEach(target => {
+                    if (target) {
+                        target.timeScale().setVisibleLogicalRange(range);
+                    }
+                });
+                isSyncingTimeScaleRef.current = false;
+            };
+        };
+
+        const onMainTimeChange = syncTimeScale(() => [volumeChartRef.current, macdChartRef.current]);
+        mainChart.timeScale().subscribeVisibleLogicalRangeChange(onMainTimeChange);
+
+        const onVolumeTimeChange = syncTimeScale(() => [mainChartRef.current, macdChartRef.current]);
+        volumeChart.timeScale().subscribeVisibleLogicalRangeChange(onVolumeTimeChange);
+
+        const onMacdTimeChange = syncTimeScale(() => [mainChartRef.current, volumeChartRef.current]);
+        macdChart.timeScale().subscribeVisibleLogicalRangeChange(onMacdTimeChange);
+
+        // Đồng bộ hóa con trỏ chéo (Crosshair)
+        const syncCrosshairs = (getTargets: () => { chart: IChartApi | null; series: any }[]) => {
+            return (param: any) => {
+                if (!param.sourceEvent) return;
+
+                const targets = getTargets();
+                if (!param.time) {
+                    targets.forEach(t => {
+                        if (t.chart) t.chart.clearCrosshairPosition();
+                    });
+                    return;
+                }
+
+                const time = param.time;
+                targets.forEach(t => {
+                    if (!t.chart || !t.series) return;
+                    
+                    let price = 0;
+                    const dataIndex = dataRef.current.findIndex(d => d.time === time);
+                    if (dataIndex !== -1) {
+                        const dataPoint = dataRef.current[dataIndex];
+                        if (t.series === volumeRef.current) {
+                            price = dataPoint.value;
+                        } else if (t.series === macdLineRef.current) {
+                            if (macdDataRef.current && macdDataRef.current[dataIndex]) {
+                                price = macdDataRef.current[dataIndex].value;
+                            }
+                        } else if (t.series === seriesRef.current) {
+                            price = dataPoint.close;
+                        }
+                    }
+
+                    t.chart.setCrosshairPosition(price, time, t.series);
+                });
+            };
+        };
+
+        const onMainCrosshairMove = syncCrosshairs(() => [
+            { chart: volumeChartRef.current, series: volumeRef.current },
+            { chart: macdChartRef.current, series: macdLineRef.current }
+        ]);
+        mainChart.subscribeCrosshairMove(onMainCrosshairMove);
+
+        const onVolumeCrosshairMove = syncCrosshairs(() => [
+            { chart: mainChartRef.current, series: seriesRef.current },
+            { chart: macdChartRef.current, series: macdLineRef.current }
+        ]);
+        volumeChart.subscribeCrosshairMove(onVolumeCrosshairMove);
+
+        const onMacdCrosshairMove = syncCrosshairs(() => [
+            { chart: mainChartRef.current, series: seriesRef.current },
+            { chart: volumeChartRef.current, series: volumeRef.current }
+        ]);
+        macdChart.subscribeCrosshairMove(onMacdCrosshairMove);
+
         const resizeObserver = new ResizeObserver(() => {
-            if (chartContainerRef.current && chart) {
-                chart.applyOptions({
-                    width: chartContainerRef.current.clientWidth,
-                    height: chartContainerRef.current.clientHeight,
+            if (mainContainerRef.current && mainChartRef.current) {
+                mainChartRef.current.applyOptions({
+                    width: mainContainerRef.current.clientWidth,
+                    height: mainContainerRef.current.clientHeight,
+                });
+            }
+            if (volumeContainerRef.current && volumeChartRef.current) {
+                volumeChartRef.current.applyOptions({
+                    width: volumeContainerRef.current.clientWidth,
+                    height: volumeContainerRef.current.clientHeight,
+                });
+            }
+            if (macdContainerRef.current && macdChartRef.current) {
+                macdChartRef.current.applyOptions({
+                    width: macdContainerRef.current.clientWidth,
+                    height: macdContainerRef.current.clientHeight,
                 });
             }
         });
-        resizeObserver.observe(chartContainerRef.current);
+        
+        resizeObserver.observe(mainContainerRef.current);
 
         return () => {
             resizeObserver.disconnect();
-            chart.remove();
+            
+            mainChart.timeScale().unsubscribeVisibleLogicalRangeChange(onMainTimeChange);
+            volumeChart.timeScale().unsubscribeVisibleLogicalRangeChange(onVolumeTimeChange);
+            macdChart.timeScale().unsubscribeVisibleLogicalRangeChange(onMacdTimeChange);
+
+            mainChart.unsubscribeCrosshairMove(onMainCrosshairMove);
+            volumeChart.unsubscribeCrosshairMove(onVolumeCrosshairMove);
+            macdChart.unsubscribeCrosshairMove(onMacdCrosshairMove);
+
+            mainChart.remove();
+            volumeChart.remove();
+            macdChart.remove();
+
             markersPrimitiveRef.current = null;
             bbUpperRef.current = null;
             bbLowerRef.current = null;
             bbFillPrimitiveRef.current = null;
+
+            mainChartRef.current = null;
+            volumeChartRef.current = null;
+            macdChartRef.current = null;
         };
     }, []);
 
-    // Cập nhật Dữ liệu
+    // Cập nhật dữ liệu cho các series
     useEffect(() => {
-        if (data.length > 0 && seriesRef.current) {
+        if (data.length > 0 && seriesRef.current && volumeRef.current && macdLineRef.current) {
+            dataRef.current = data;
             const candleData = data.map(d => ({ time: d.time, open: d.open, high: d.high, low: d.low, close: d.close }));
             const volumeData = data.map(d => ({ 
                 time: d.time, 
@@ -550,23 +774,14 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
             seriesRef.current.setData(candleData);
             volumeRef.current.setData(volumeData);
             
-            // Tính toán SMA
             const sma10Data = calculateSMA(data, 10);
             const sma20Data = calculateSMA(data, 20);
             sma10Ref.current.setData(sma10Data);
             sma20Ref.current.setData(sma20Data);
 
-            // Tính toán Bollinger Bands
             const { upper: bbUpperData, lower: bbLowerData } = calculateBollingerBands(data, 20, 2);
             bbUpperRef.current.setData(bbUpperData);
             bbLowerRef.current.setData(bbLowerData);
-
-            // Thiết lập dữ liệu dải màu Bollinger Bands Fill dựa trên MA 10-20 trend
-            const sma10Map = new Map();
-            sma10Data.forEach(d => sma10Map.set(d.time, d.value));
-
-            const sma20Map = new Map();
-            sma20Data.forEach(d => sma20Map.set(d.time, d.value));
 
             const bbFillData: BandPoint[] = [];
             for (let i = 0; i < bbUpperData.length; i++) {
@@ -574,19 +789,18 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
                 const upperVal = bbUpperData[i].value;
                 const lowerVal = bbLowerData[i].value;
 
-                // Xác định trạng thái xu hướng dựa trên tín hiệu MUA/BÁN gần nhất trước thời điểm nến
-                let isBullish = false; // Mặc định là vùng đỏ (đang chờ mua hoặc đứng ngoài thị trường)
+                let isBullish = false;
                 if (Array.isArray(markers) && markers.length > 0) {
                     let lastActiveMarker = null;
                     for (let m = 0; m < markers.length; m++) {
                         if (markers[m].time <= time) {
                             lastActiveMarker = markers[m];
                         } else {
-                            break; // Dừng lại vì markers được xếp tăng dần theo thời gian
+                            break;
                         }
                     }
                     if (lastActiveMarker) {
-                        isBullish = lastActiveMarker.shape === 'arrowUp'; // Nếu tín hiệu gần nhất là MUA -> xanh, BÁN -> đỏ
+                        isBullish = lastActiveMarker.shape === 'arrowUp';
                     }
                 }
 
@@ -599,29 +813,24 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
             }
             bbFillPrimitiveRef.current.setData(bbFillData);
 
-            // Tính toán MACD
             const { macd, signal, hist } = calculateMACD(data);
+            macdDataRef.current = macd;
             macdLineRef.current.setData(macd);
             macdSignalRef.current.setData(signal);
             macdHistRef.current.setData(hist);
 
-            // Thay vì zoom out toàn bộ làm nến bị tí hon (fitContent), ta set hiển thị khoảng nến tối ưu dựa trên kích thước màn hình
-            if (chartRef.current) {
-                // CHỈ reset lại khung nhìn (Zoom/Pan) nếu mã chứng khoán hoặc khung thời gian thay đổi.
-                // Nếu chỉ là polling cập nhật của cùng một mã, tuyệt đối giữ nguyên khung nhìn của người dùng!
+            if (mainChartRef.current) {
                 if (currentChartIdRef.current !== chartId) {
-                    const isMobile = window.innerWidth < 768;
                     const count = Math.min(data.length, isMobile ? 50 : 100);
-                    
-                    const chartInstance = chartRef.current;
+                    const chartInstance = mainChartRef.current;
                     const dataLength = data.length;
                     
                     setTimeout(() => {
-                        if (chartRef.current === chartInstance) {
+                        if (mainChartRef.current === chartInstance) {
                             try {
                                 chartInstance.timeScale().setVisibleLogicalRange({
                                     from: dataLength - count,
-                                    to: dataLength + 4, // Thêm 4 nến trống bên phải làm lề giống TradingView
+                                    to: dataLength + 4,
                                 });
                             } catch (e) {
                                 console.error("Lỗi set visible logical range:", e);
@@ -632,42 +841,129 @@ export const TVChart: React.FC<TVChartProps> = ({ data, indicators, markers = []
                 }
             }
         }
-    }, [data, markers]);
+    }, [data, markers, chartId]);
 
-    // Cập nhật Markers
+    // Cập nhật Markers vẽ lại series
     useEffect(() => {
         if (markersPrimitiveRef.current && Array.isArray(markers)) {
             markersPrimitiveRef.current.setData(markers, data);
-            // Kích hoạt vẽ lại series để Canvas Primitive hiển thị các marker mới
             if (seriesRef.current) seriesRef.current.applyOptions({});
         }
     }, [markers, data]);
 
-    // Cập nhật hiển thị (bật tắt Indicators)
+    // Bật tắt và co giãn các khung
     useEffect(() => {
         if (sma10Ref.current) sma10Ref.current.applyOptions({ visible: indicators.sma10 });
         if (sma20Ref.current) sma20Ref.current.applyOptions({ visible: indicators.sma20 });
         
-        // Bật tắt Bollinger Bands
         if (bbUpperRef.current) bbUpperRef.current.applyOptions({ visible: indicators.bollinger });
         if (bbLowerRef.current) bbLowerRef.current.applyOptions({ visible: indicators.bollinger });
         if (bbFillPrimitiveRef.current) {
             bbFillPrimitiveRef.current.setVisible(indicators.bollinger);
-            // KHI BẬT TẮT CHỈ BÁO, KHÔNG ĐƯỢC THAY ĐỔI TIMESCALE CỦA BIỂU ĐỒ (không gọi fitContent hay setVisibleLogicalRange)
-            // Chỉ gọi applyOptions rỗng trên series để force Lightweight Charts redraw primitive
             if (seriesRef.current) seriesRef.current.applyOptions({});
         }
 
-        if (volumeRef.current) volumeRef.current.applyOptions({ visible: indicators.volume });
-        if (macdLineRef.current) macdLineRef.current.applyOptions({ visible: indicators.macd });
-        if (macdSignalRef.current) macdSignalRef.current.applyOptions({ visible: indicators.macd });
-        if (macdHistRef.current) macdHistRef.current.applyOptions({ visible: indicators.macd });
-    }, [indicators, data]);
+        const isMacdVisible = indicators.macd;
+        const isVolumeVisible = indicators.volume;
+
+        if (mainChartRef.current) {
+            mainChartRef.current.timeScale().applyOptions({
+                visible: !isVolumeVisible && !isMacdVisible,
+            });
+        }
+        if (volumeChartRef.current) {
+            volumeChartRef.current.timeScale().applyOptions({
+                visible: isVolumeVisible && !isMacdVisible,
+            });
+        }
+        if (macdChartRef.current) {
+            macdChartRef.current.timeScale().applyOptions({
+                visible: isMacdVisible,
+            });
+        }
+
+        setTimeout(() => {
+            if (mainContainerRef.current && mainChartRef.current) {
+                mainChartRef.current.applyOptions({
+                    width: mainContainerRef.current.clientWidth,
+                    height: mainContainerRef.current.clientHeight,
+                });
+            }
+            if (volumeContainerRef.current && volumeChartRef.current) {
+                volumeChartRef.current.applyOptions({
+                    width: volumeContainerRef.current.clientWidth,
+                    height: volumeContainerRef.current.clientHeight,
+                });
+            }
+            if (macdContainerRef.current && macdChartRef.current) {
+                macdChartRef.current.applyOptions({
+                    width: macdContainerRef.current.clientWidth,
+                    height: macdContainerRef.current.clientHeight,
+                });
+            }
+        }, 50);
+
+    }, [indicators, volumeHeight, macdHeight]);
 
     return (
-        <div 
-            ref={chartContainerRef} 
-            className="absolute top-0 left-0 right-0 bottom-12 md:bottom-0" 
-        />
+        <div className="absolute top-0 left-0 right-0 bottom-12 md:bottom-0 flex flex-col p-0 bg-white select-none gap-0">
+            {/* Vùng đồ thị giá */}
+            <div 
+                ref={mainContainerRef} 
+                className="flex-grow w-full overflow-hidden relative bg-white"
+            />
+            
+            {/* Thanh phân cách siêu mỏng như chỉ (Giá - Volume) */}
+            {indicators.volume && (
+                <div 
+                    onMouseDown={startDragVolume}
+                    onTouchStart={startDragVolume}
+                    className="h-[1px] w-full bg-gray-200 relative select-none z-20"
+                >
+                    <div className="absolute -top-1.5 -bottom-1.5 left-0 right-0 cursor-row-resize" />
+                </div>
+            )}
+
+            {/* Vùng đồ thị Volume */}
+            <div 
+                className={`relative w-full overflow-hidden bg-white ${
+                    indicators.volume ? 'block' : 'hidden'
+                }`} 
+                style={{ 
+                    height: indicators.volume ? `${volumeHeight}px` : '0px',
+                }}
+            >
+                <div ref={volumeContainerRef} className="w-full h-full" />
+                <div className="absolute top-1.5 left-2.5 z-10 text-[9px] font-bold text-gray-500 bg-white/80 backdrop-blur px-1.5 py-0.5 rounded border border-gray-200/50 pointer-events-none uppercase tracking-wider">
+                    Volume - Khối lượng
+                </div>
+            </div>
+
+            {/* Thanh phân cách siêu mỏng như chỉ (Volume/Giá - MACD) */}
+            {indicators.macd && (
+                <div 
+                    onMouseDown={startDragMacd}
+                    onTouchStart={startDragMacd}
+                    className="h-[1px] w-full bg-gray-200 relative select-none z-20"
+                >
+                    <div className="absolute -top-1.5 -bottom-1.5 left-0 right-0 cursor-row-resize" />
+                </div>
+            )}
+
+            {/* Vùng đồ thị MACD */}
+            <div 
+                className={`relative w-full overflow-hidden bg-white ${
+                    indicators.macd ? 'block' : 'hidden'
+                }`} 
+                style={{ 
+                    height: indicators.macd ? `${macdHeight}px` : '0px',
+                }}
+            >
+                <div ref={macdContainerRef} className="w-full h-full" />
+                <div className="absolute top-1.5 left-2.5 z-10 text-[9px] font-bold text-gray-500 bg-white/80 backdrop-blur px-1.5 py-0.5 rounded border border-gray-200/50 pointer-events-none uppercase tracking-wider">
+                    MACD (12, 26, 9)
+                </div>
+            </div>
+        </div>
     );
 };
