@@ -7,63 +7,63 @@ const WATCHLIST_SYMBOLS = [
     'LPB', 'MBB', 'MSN', 'MWG', 'PLX', 'PNJ', 'POW', 'SAB', 'SHB', 'SSB',
     'SSI', 'STB', 'TCB', 'TPB', 'VCB', 'VHM', 'VIB', 'VIC', 'VJC', 'VNM',
     'VPB', 'VRE',
-    
+
     // --- NGÂN HÀNG & CHỨNG KHOÁN & TÀI CHÍNH ---
     'MSB', 'OCB', 'EIB', 'NAB', 'ABB', 'BVB', 'PGB', 'SGB', 'VBB', 'BAB',
     'NVB', 'KLB', 'VAB', 'EVF', 'DSE', 'BMS', 'ABW', 'PHS', 'CSI', 'VIX',
     'VND', 'VCI', 'HCM', 'SHS', 'MBS', 'FTS', 'BSI', 'CTS', 'ORS', 'AGR',
     'BVS', 'TCI', 'PSI', 'APG', 'TVB', 'SBS', 'VDS', 'IVS', 'EVS', 'HBS',
     'TVC', 'TVS', 'WSS', 'AAS', 'VIG', 'DSC', 'VFS', 'HAC', 'PFS',
-    
+
     // --- BẤT ĐỘNG SẢN & PHÁT TRIỂN ĐÔ THỊ ---
     'DIG', 'DXG', 'NLG', 'KDH', 'CEO', 'PDR', 'DXS', 'HDC', 'IJC', 'VPI',
     'TCH', 'HQC', 'SCR', 'CRE', 'SJS', 'SZC', 'KBC', 'ITA', 'LHG', 'TIP',
     'D2D', 'NHA', 'DRH', 'NDN', 'VPH', 'QCG', 'LDG', 'HAR', 'KHG', 'TCD',
     'EVG', 'MST', 'IDJ', 'API', 'APS', 'L14', 'DTA', 'FIT', 'ITC', 'LGL',
     'NBB', 'NTL', 'PFL', 'PTL', 'PVL', 'TDH', 'VRC', 'SZL', 'SZB', 'IDC',
-    
+
     // --- THÉP & KHAI KHOÁNG ---
     'HSG', 'NKG', 'TLH', 'SMC', 'POM', 'VGS', 'TIS', 'TVN', 'KSB', 'DHA',
     'MSR', 'NNC', 'BMC', 'NBC', 'TC6', 'THT', 'TVD', 'ALV', 'ACM', 'BKC',
     'HGM', 'KHL', 'KMT', 'LCM', 'MDC', 'MIC', 'MVB', 'NAG', 'TCS', 'TDN',
-    
+
     // --- XÂY DỰNG & ĐẦU TƯ CÔNG ---
     'VCG', 'HHV', 'LCG', 'FCN', 'C4G', 'G36', 'BCG', 'CII', 'HUT', 'HT1', 'CTI',
     'BCC', 'DPG', 'PHR', 'DPR', 'TRC', 'DRI', 'CDC', 'CTD', 'HBC',
     'SCG', 'ACC', 'CMS', 'CSC', 'L18', 'MCG', 'PHC', 'SD5',
     'SD6', 'SD9', 'S99', 'TGG', 'VC1', 'VC2', 'VC3', 'VC7', 'VC9', 'VMC',
-    
+
     // --- DẦU KHÍ, NĂNG LƯỢNG & ĐIỆN ---
     'PVD', 'PVS', 'PVT', 'PVC', 'BSR', 'OIL', 'NT2', 'PC1', 'GEG', 'HDG',
     'REE', 'TV2', 'VSH', 'SJD', 'TTA', 'PGD', 'PGB', 'PGS', 'PVB',
     'PVM', 'PVP', 'PVY', 'CNG', 'LIG', 'KHP', 'VPD', 'TMP',
-    
+
     // --- HÓA CHẤT, NHỰA & PHÂN BÓN ---
     'DPM', 'DCM', 'BFC', 'DDV', 'DGC', 'DHC', 'HVT', 'LIX', 'NET', 'AAA', 'APH',
     'BMP', 'NTP', 'DAG', 'HCD', 'RDP', 'PLP',
     'CSV', 'LAS', 'SFG', 'VFG', 'CPC', 'PLC', 'TOC',
-    
+
     // --- TIÊU DÙNG, BÁN LẺ & THỰC PHẨM ---
     'FRT', 'DGW', 'PET', 'HAX', 'VEA', 'VHC', 'ANV', 'IDI', 'FMC', 'MPC', 'CMX',
     'ACL', 'PAN', 'LTG', 'TAR', 'NSC', 'HAG', 'HNG', 'DBC', 'BAF', 'VLC',
     'MCH', 'VOC', 'KDC', 'SBT', 'LSS', 'SLS', 'BHN',
     'DAT', 'TLD', 'MML', 'VSF', 'MCM', 'CLX', 'HTM', 'TTB', 'VHE', 'DL1',
-    
+
     // --- CÔNG NGHỆ & VIỄN THÔNG ---
     'CMG', 'ELC', 'FOX', 'TTN', 'MFS', 'VTC', 'ITD', 'SGT', 'FOC', 'HIG',
     'ICT', 'ONE', 'VGI', 'CTR', 'VTE', 'VNZ', 'VIE', 'SMN', 'VEC',
-    
+
     // --- CẢNG BIỂN, LOGISTICS & VẬN TẢI ---
     'GMD', 'HAH', 'SCS', 'VSC', 'VIP', 'VTO', 'PDN', 'SGP', 'MVN', 'TCL', 'DXP',
     'VOS', 'TMS', 'DVP', 'ILB', 'STG', 'VNA', 'CDN',
-    
+
     // --- DỆT MAY & DA GIÀY ---
     'TNG', 'MSH', 'GIL', 'TCM', 'VGG', 'STK', 'MHC', 'HTG', 'ADS',
     'FTM', 'KMR', 'TDT', 'TVT', 'VGT', 'M10', 'BGG', 'NDF', 'VTG',
-    
+
     // --- NÔNG LÂM THỦY SẢN & CAO SU ---
     'ASM', 'SJ1', 'BLF', 'ABT', 'TS4', 'CAD',
-    
+
     // --- CÁC MÃ DỊCH VỤ & KHÁC ---
     'HVN', 'VJC', 'ACV', 'VTP', 'DHG', 'TRA', 'DBD', 'DMC', 'IMP', 'AMV', 'JVC', 'TNH', 'LDP', 'PME',
     'SAM', 'VGC', 'VNP', 'VPS', 'YEG', 'AME', 'APF', 'APP', 'ASA', 'ATB', 'ATG', 'B82', 'BAM', 'BAP',
@@ -93,30 +93,30 @@ export interface ScreenerResult {
 export class Screener {
     async scanAll(): Promise<ScreenerResult[]> {
         const market = new Market();
-        
+
         const to = Math.floor(Date.now() / 1000);
         // Đồng bộ hoàn toàn với App.tsx: Lấy 5 năm dữ liệu để các đường EMA (MACD) hội tụ chính xác 100%
         const from = to - 5 * 365 * 24 * 60 * 60;
-        
+
         // Loại bỏ trùng lặp trong danh sách mã
         const uniqueSymbols = Array.from(new Set(WATCHLIST_SYMBOLS));
         const results: ScreenerResult[] = [];
-        
+
         // Chia thành các chunk (mỗi nhóm 20 mã) để quét bất đồng bộ tuần tự, tránh bị Entrade chặn IP
         const chunkSize = 20;
         for (let i = 0; i < uniqueSymbols.length; i += chunkSize) {
             const chunk = uniqueSymbols.slice(i, i + chunkSize);
-            const promises = chunk.map(symbol => 
+            const promises = chunk.map(symbol =>
                 market.equity(symbol).ohlcv(from.toString(), to.toString(), '1D')
                     .then(data => this.processSignal(symbol, data))
                     .catch(err => null)
             );
-            
+
             const chunkResults = await Promise.all(promises);
             for (const res of chunkResults) {
                 if (res) results.push(res);
             }
-            
+
             // Nghỉ nhẹ 30ms giữa các chunk để tránh bị rate limit
             await new Promise(resolve => setTimeout(resolve, 30));
         }
@@ -214,7 +214,7 @@ export class Screener {
             // T+ chuẩn: đếm số nến giao dịch (tự động bỏ qua T7, CN, ngày lễ)
             const daysHeld = (data.length - 1) - lastTrade.index;
             const profit = ((latestData.close - lastTrade.price) / lastTrade.price) * 100;
-            
+
             return {
                 symbol,
                 signal: isLastBarTrade ? 'MUA' : 'HOLD',

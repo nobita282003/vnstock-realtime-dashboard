@@ -6,20 +6,20 @@
   "scripts": {
     "build": "npm install --prefix frontend && npm run build --prefix frontend && tsc",
     "start": "node dist/server.js",
-    "be": "ts-node server.ts",
+    "be": "node --watch -r ts-node/register server.ts",
     "fe": "npm run dev --prefix frontend",
     "dev": "concurrently \"npm run be\" \"npm run fe\""
   },
   "dependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^20.12.7",
     "axios": "^1.6.8",
     "cors": "^2.8.6",
     "date-fns": "^3.6.0",
     "express": "^5.2.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/node": "^20.12.7"
+    "typescript": "^5.4.5"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

@@ -15,7 +15,9 @@ export class Market {
                     toTs += 86399;
                 }
 
-                const url = `https://services.entrade.com.vn/chart-api/v2/ohlcs/stock?from=${fromTs}&to=${toTs}&symbol=${symbol}&resolution=${resolution}`;
+                const isIndex = ['VNINDEX', 'VN30', 'HNX', 'UPCOM'].includes(symbol.toUpperCase());
+                const type = isIndex ? 'index' : 'stock';
+                const url = `https://services.entrade.com.vn/chart-api/v2/ohlcs/${type}?from=${fromTs}&to=${toTs}&symbol=${symbol}&resolution=${resolution}`;
 
                 try {
                     const response = await axios.get(url);
@@ -47,7 +49,7 @@ export class Market {
 
                         // Nếu toTs (người dùng yêu cầu) bao gồm ngày hôm nay
                         if (toTs >= startOfToday) {
-                            const liveUrl = `https://services.entrade.com.vn/chart-api/v2/ohlcs/stock?from=${startOfToday}&to=${currentTs}&symbol=${symbol}&resolution=1`;
+                            const liveUrl = `https://services.entrade.com.vn/chart-api/v2/ohlcs/${type}?from=${startOfToday}&to=${currentTs}&symbol=${symbol}&resolution=1`;
                             try {
                                 const liveRes = await axios.get(liveUrl);
                                 const liveData = liveRes.data;

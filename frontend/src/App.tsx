@@ -143,10 +143,10 @@ function App() {
     // Tải dữ liệu lần đầu tiên (hiển thị loading spinner)
     loadData(true);
 
-    // Thiết lập Polling cập nhật dữ liệu sau mỗi 10 giây (không hiện loading spinner để tránh gián đoạn trải nghiệm)
+    // Thiết lập Polling cập nhật dữ liệu sau mỗi 5 giây (không hiện loading spinner để tránh gián đoạn trải nghiệm)
     const intervalId = setInterval(() => {
       loadData(false);
-    }, 10000);
+    }, 5000);
 
     return () => {
       active = false;
@@ -181,16 +181,20 @@ function App() {
     const trades: any[] = [];
     const sma10: (number | null)[] = [];
     const sma20: (number | null)[] = [];
+    const sma50: (number | null)[] = [];
 
-    // 1. Tính SMA 10, 20
-    let sum10 = 0, sum20 = 0;
+    // 1. Tính SMA 10, 20, 50
+    let sum10 = 0, sum20 = 0, sum50 = 0;
     for (let i = 0; i < data.length; i++) {
       sum10 += data[i].close;
       sum20 += data[i].close;
+      sum50 += data[i].close;
       if (i >= 10) sum10 -= data[i - 10].close;
       if (i >= 20) sum20 -= data[i - 20].close;
+      if (i >= 50) sum50 -= data[i - 50].close;
       sma10[i] = i >= 9 ? sum10 / 10 : null;
       sma20[i] = i >= 19 ? sum20 / 20 : null;
+      sma50[i] = i >= 49 ? sum50 / 50 : null;
     }
 
     // 2. Hàm tính EMA cho MACD
@@ -227,6 +231,8 @@ function App() {
       const prevClose = data[i - 1].close;
       const currMA20 = sma20[i];
       const prevMA20 = sma20[i - 1];
+      const currMA50 = sma50[i];
+      const prevMA50 = sma50[i - 1];
 
       if (currMA20 === null || prevMA20 === null) continue;
 
@@ -238,10 +244,19 @@ function App() {
 
       // --- TRẠNG THÁI THỊ TRƯỜNG (CỐT LÕI THUẬT TOÁN) ---
 
+      // Lọc xu hướng (Trend Filter): Chuyên gia không mua khi MA20 cắm đầu xuống, trừ khi giá đã vượt MA50
+      const ma20Rising = currMA20 >= prevMA20;
+      const aboveMA50 = currMA50 !== null ? currClose > currMA50 : true;
+      const trendFilterOK = ma20Rising || aboveMA50;
+      
+      const prevMa20Rising = i >= 2 ? prevMA20 >= sma20[i - 2]! : true;
+      const prevAboveMA50 = prevMA50 !== null ? prevClose > prevMA50 : true;
+      const prevTrendFilterOK = prevMa20Rising || prevAboveMA50;
+
       // 1. TRẠNG THÁI BULLISH (TĂNG MẠNH):
-      // Đòi hỏi sự đồng thuận: Giá BẮT BUỘC phải nằm trên MA20 (xu hướng tăng) VÀ MACD phải > 0 (động lượng mạnh)
-      const currentlyBullish = currHist > 0 && currClose > currMA20;
-      const previouslyBullish = prevHist > 0 && prevClose > prevMA20;
+      // Đòi hỏi sự đồng thuận: Giá > MA20, MACD > 0, VÀ thoả mãn Trend Filter
+      const currentlyBullish = currHist > 0 && currClose > currMA20 && trendFilterOK;
+      const previouslyBullish = prevHist > 0 && prevClose > prevMA20 && prevTrendFilterOK;
 
       // 2. TRẠNG THÁI BEARISH (GIẢM MẠNH):
       // Sự đồng thuận: Giá thủng dưới MA20 VÀ MACD âm
@@ -368,7 +383,7 @@ function App() {
               <Zap size={14} className="fill-white" />
             </div>
             <span className="hidden sm:inline font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-500">
-              Nexus<span className="text-gray-800 font-bold ml-0.5">Trade</span><span className="text-blue-500 font-semibold text-[10px] ml-1 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 uppercase tracking-wider">PRO</span>
+              NTA
             </span>
           </div>
 
@@ -378,6 +393,7 @@ function App() {
             <input
               className="w-14 md:w-20 font-bold bg-transparent outline-none uppercase text-base md:text-sm"
               value={searchInput}
+              onFocus={() => setSearchInput('')}
               onChange={e => {
                 const val = e.target.value;
                 setSearchInput(val);
